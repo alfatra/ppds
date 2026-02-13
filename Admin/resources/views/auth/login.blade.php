@@ -15,15 +15,15 @@
                                         <div class="text-center">
                                             <div>
                                                 <a href="/index" class="authentication-logo">
-                                                    <img src="{{ URL::asset('build/images/logo-dark.png') }}" alt="" height="20"
+                                                    <img src="{{ URL::asset('build/images/logo_rssm.png') }}" alt="" height="60"
                                                         class="auth-logo logo-dark mx-auto">
                                                     <img src="{{ URL::asset('build/images/logo-light.png') }}" alt="" height="20"
                                                         class="auth-logo logo-light mx-auto">
                                                 </a>
                                             </div>
 
-                                            <h4 class="font-size-18 mt-4">Welcome Back !</h4>
-                                            <p class="text-muted">Sign in to continue to Nazox.</p>
+                                            <h4 class="font-size-18 mt-4">SELAMAT DATANG !</h4>
+                                            <p class="text-muted">Silahkan Login.</p>
                                         </div>
 
                                         <div class="p-2 mt-5">
@@ -33,8 +33,8 @@
                                                 <div class="mb-3 auth-form-group-custom mb-4">
                                                     <i class="ri-user-2-line auti-custom-input-icon"></i>
                                                     <label for="email" class="fw-semibold">Email <span class="text-danger">*</span></label>
-                                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                                        name="email" id="email" value="admin@themesdesign.com" required
+                                                    <input type="email" class="form-control @error('email') is-invalid @enderror" name="email"
+                                                        id="email" value="{{ old('email') }}" required
                                                         autocomplete="email" autofocus placeholder="Enter email">
                                                     @error('email')
                                                         <span class="invalid-feedback" role="alert">
@@ -46,10 +46,9 @@
                                                 <div class="mb-3 auth-form-group-custom mb-4">
                                                     <i class="ri-lock-2-line auti-custom-input-icon"></i>
                                                     <label for="userpassword">Password <span class="text-danger">*</span></label>
-                                                    <input type="password"
-                                                        class="form-control @error('password') is-invalid @enderror"
-                                                        id="userpassword" name="password" required value="12345678"
-                                                        autocomplete="current-password" placeholder="Enter password">
+                                                    <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                                        id="userpassword" name="password" required autocomplete="current-password"
+                                                        placeholder="Enter password">
                                                     @error('password')
                                                         <span class="invalid-feedback" role="alert">
                                                             <strong>{{ $message }}</strong>
@@ -58,8 +57,7 @@
                                                 </div>
 
                                                 <div class="form-check">
-                                                    <input type="checkbox" class="form-check-input" id="customControlInline"
-                                                        name="remember" id="remember"
+                                                    <input type="checkbox" class="form-check-input" id="customControlInline" name="remember"
                                                         {{ old('remember') ? 'checked' : '' }}>
                                                     <label class="form-check-label" for="customControlInline">Remember
                                                         me</label>

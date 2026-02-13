@@ -10,7 +10,7 @@
                     <div class="text-center">
                         <div class="mb-5">
                             <a href="index" class="authentication-logo">
-                                <img src="{{ URL::asset('build/images/logo-dark.png') }}" alt="" height="20"
+                                <img src="{{ URL::asset('build/images/logo_rssm.png') }}" alt="" height="20"
                                     class="auth-logo logo-dark mx-auto">
                                 <img src="{{ URL::asset('build/images/logo-light.png') }}" alt="" height="20"
                                     class="auth-logo logo-light mx-auto">

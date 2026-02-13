@@ -15,13 +15,13 @@
                                             <div class="text-center">
                                                 <div>
                                                     <a href="index" class="authentication-logo">
-                                                        <img src="{{ URL::asset('build/images/logo-dark.png') }}" alt="" height="20" class="auth-logo logo-dark mx-auto">
+                                                        <img src="{{ URL::asset('build/images/logo_rssm.png') }}" alt="" height="20" class="auth-logo logo-dark mx-auto">
                                                         <img src="{{ URL::asset('build/images/logo-light.png') }}" alt="" height="20" class="auth-logo logo-light mx-auto">
                                                     </a>
                                                 </div>
     
                                                 <h4 class="font-size-18 mt-4">Register account</h4>
-                                                <p class="text-muted">Get your free Nazox account now.</p>
+                                                <p class="text-muted">Silahkan daftar untuk akun ppds.</p>
                                             </div>
 
                                             <div class="p-2 mt-5">

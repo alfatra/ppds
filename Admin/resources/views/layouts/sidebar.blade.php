@@ -15,6 +15,17 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
+            
+                    <li>
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
+                            <i class="ri-file-list-3-line"></i>
+                            <span>Data PPDS</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="{{ route('ppds.form') }}">Form Input</a></li>
+                        </ul>
+                    </li>
+
 
                 <li>
                     <a href="calendar" class=" waves-effect">
