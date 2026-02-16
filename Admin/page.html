@@ -1,9 +1,26 @@
-@extends('layouts.master-without-nav')
-@section('title')
-    Login
-@endsection
-@section('content')
-    <div>
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>    Login
+ | Nazox - Admin & Dashboard Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="Themesdesign" name="author" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="http://127.0.0.1:8000/build/images/favicon.ico">
+
+    <!-- Bootstrap Css -->
+<link href="http://127.0.0.1:8000/build/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+<!-- Icons Css -->
+<link href="http://127.0.0.1:8000/build/css/icons.min.css" rel="stylesheet" type="text/css" />
+<!-- App Css-->
+<link href="http://127.0.0.1:8000/build/css/app.min.css" id="app-style" rel="stylesheet" type="text/css" /></head>
+
+<body class="auth-body-bg">
+
+        <div>
         <div class="container-fluid p-0">
             <div class="row g-0">
                 <div class="col-lg-4">
@@ -15,9 +32,9 @@
                                         <div class="text-center">
                                             <div>
                                                 <a href="/index" class="authentication-logo">
-                                                    <img src="{{ URL::asset('build/images/logo-dark.png') }}" alt="" height="60"
+                                                    <img src="http://127.0.0.1:8000/build/images/logo_rssm.png" alt="" height="60"
                                                         class="auth-logo logo-dark mx-auto">
-                                                    <img src="{{ URL::asset('build/images/logo-sm-light.png') }}" alt="" height="20"
+                                                    <img src="http://127.0.0.1:8000/build/images/logo-light.png" alt="" height="20"
                                                         class="auth-logo logo-light mx-auto">
                                                 </a>
                                             </div>
@@ -27,38 +44,27 @@
                                         </div>
 
                                         <div class="p-2 mt-5">
-                                            <form method="POST" action="{{ route('login') }}">
-                                                @csrf
-
+                                            <form method="POST" action="http://127.0.0.1:8000/login">
+                                                <input type="hidden" name="_token" value="PQrOtvahJftxTy4dYL5vY239AU8KbHGoEtOM04ph" autocomplete="off">
                                                 <div class="mb-3 auth-form-group-custom mb-4">
                                                     <i class="ri-user-2-line auti-custom-input-icon"></i>
                                                     <label for="email" class="fw-semibold">Email <span class="text-danger">*</span></label>
-                                                    <input type="email" class="form-control @error('email') is-invalid @enderror" name="email"
-                                                        id="email" value="{{ old('email') }}" required
+                                                    <input type="email" class="form-control " name="email"
+                                                        id="email" value="" required
                                                         autocomplete="email" autofocus placeholder="Enter email">
-                                                    @error('email')
-                                                        <span class="invalid-feedback" role="alert">
-                                                            <strong>{{ $message }}</strong>
-                                                        </span>
-                                                    @enderror
-                                                </div>
+                                                                                                    </div>
 
                                                 <div class="mb-3 auth-form-group-custom mb-4">
                                                     <i class="ri-lock-2-line auti-custom-input-icon"></i>
                                                     <label for="userpassword">Password <span class="text-danger">*</span></label>
-                                                    <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                                    <input type="password" class="form-control "
                                                         id="userpassword" name="password" required autocomplete="current-password"
                                                         placeholder="Enter password">
-                                                    @error('password')
-                                                        <span class="invalid-feedback" role="alert">
-                                                            <strong>{{ $message }}</strong>
-                                                        </span>
-                                                    @enderror
-                                                </div>
+                                                                                                    </div>
 
                                                 <div class="form-check">
                                                     <input type="checkbox" class="form-check-input" id="customControlInline" name="remember"
-                                                        {{ old('remember') ? 'checked' : '' }}>
+                                                        >
                                                     <label class="form-check-label" for="customControlInline">Remember
                                                         me</label>
                                                 </div>
@@ -68,20 +74,18 @@
                                                         type="submit">Log In</button>
                                                 </div>
 
-                                                @if (Route::has('password.request'))
-                                                    <div class="mt-4 text-center">
-                                                        <a href="{{ route('password.request') }}" class="text-muted"><i
+                                                                                                    <div class="mt-4 text-center">
+                                                        <a href="http://127.0.0.1:8000/password/reset" class="text-muted"><i
                                                                 class="mdi mdi-lock me-1"></i> Forgot your password?</a>
                                                     </div>
-                                                @endif
-                                            </form>
+                                                                                            </form>
                                         </div>
 
                                         <div class="mt-5 text-center">
-                                            <p>Don't have an account ? <a href="{{ route('register') }}"
+                                            <p>Don't have an account ? <a href="http://127.0.0.1:8000/register"
                                                     class="fw-medium text-primary"> Register </a> </p>
                                             <p>©
-                                                {{ date('Y') }} Nazox. Crafted with <i
+                                                2026 Nazox. Crafted with <i
                                                     class="mdi mdi-heart text-danger"></i> by Themesdesign
                                             </p>
                                         </div>
@@ -99,4 +103,14 @@
             </div>
         </div>
     </div>
-@endsection
+
+    <!-- JAVASCRIPT -->
+<script src="http://127.0.0.1:8000/build/libs/jquery/jquery.min.js"></script>
+<script src="http://127.0.0.1:8000/build/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="http://127.0.0.1:8000/build/libs/metismenu/metisMenu.min.js"></script>
+<script src="http://127.0.0.1:8000/build/libs/simplebar/simplebar.min.js"></script>
+<script src="http://127.0.0.1:8000/build/libs/node-waves/waves.min.js"></script>
+</body>
+
+</html>
+

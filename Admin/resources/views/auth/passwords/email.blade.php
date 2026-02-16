@@ -15,9 +15,9 @@
                                         <div class="text-center">
                                             <div>
                                                 <a href="/index" class="">
-                                                        <img src="{{ URL::asset('build/images/logo_rssm.png') }}" alt=""
+                                                        <img src="{{ URL::asset('build/images/logo-dark.png') }}" alt=""
                                                         height="20" class="auth-logo logo-dark mx-auto">
-                                                    <img src="{{ URL::asset('build/images/logo-light.png') }}"
+                                                    <img src="{{ URL::asset('build/images/logo-sm-light.png') }}"
                                                         alt="" height="20" class="auth-logo logo-light mx-auto">
                                                 </a>
                                             </div>
