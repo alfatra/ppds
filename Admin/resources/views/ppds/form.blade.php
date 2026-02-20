@@ -1,327 +1,143 @@
 @extends('layouts.master')
 @section('title')
-	Form Elements
+	Data PPDS
 @endsection
+@push('css')
+    <!-- DataTables -->
+    <link href="{{ URL::asset('build/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+
+    <!-- Responsive datatable examples -->
+    <link href="{{ URL::asset('build/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet" type="text/css" />
+@endpush
 @section('content')
-	<x-breadcrumb pagetitle="Forms" title="Forms Elements" />
+	<x-breadcrumb pagetitle="PPDS" title="Data PPDS" />
 
 	<div class="row">
 		<div class="col-12">
 			<div class="card">
 				<div class="card-body">
+					<div>
+                        {{-- Mengarahkan ke halaman form tambah data --}}
+						<a href="{{ route('ppds.create') }}" class="btn btn-success mb-2"><i class="mdi mdi-plus me-2"></i> Tambah Data PPDS</a>
+					</div>
 
-					<h4 class="card-title">Textual inputs</h4>
-					<p class="card-title-desc">Here are examples of <code class="highlighter-rouge">.form-control</code>
-						applied to each
-						textual HTML5 <code class="highlighter-rouge">&lt;input&gt;</code> <code
-							class="highlighter-rouge">type</code>.</p>
-					<div class="row mb-3">
-						<label for="example-text-input" class="col-sm-2 col-form-label">NAMA LENGKAPt</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="text" placeholder="Artisanal kale" id="example-text-input">
-						</div>
+					<div class="table-responsive mt-3">
+						<table class="table table-centered datatable dt-responsive nowrap"
+							style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+							<thead class="thead-light">
+								<tr>
+									<th style="width: 20px;">
+										<div class="form-check">
+											<input type="checkbox" class="form-check-input" id="select-all-check">
+											<label class="form-check-label mb-0" for="select-all-check">&nbsp;</label>
+										</div>
+									</th>
+									<th>Nama Lengkap</th>
+									<th>Email</th>
+									<th>Telepon</th>
+									<th>Agama</th>
+									<th>Tanggal Bergabung</th>
+									<th style="width: 120px;">Aksi</th>
+								</tr>
+							</thead>
+							<tbody>
+                                @foreach ($ppds_list as $ppds)
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="check-{{ $ppds->id }}">
+                                                <label class="form-check-label mb-0" for="check-{{ $ppds->id }}">&nbsp;</label>
+                                            </div>
+                                        </td>
+                                        <td>{{ $ppds->nama_lengkap }}</td>
+                                        <td>{{ $ppds->email }}</td>
+                                        <td>{{ $ppds->telepon ?? '-' }}</td>
+                                        <td>{{ $ppds->agama ?? '-' }}</td>
+                                        <td>{{ $ppds->created_at->format('d M, Y') }}</td>
+                                        <td id="tooltip-container-{{ $ppds->id }}">
+                                            {{-- TODO: Arahkan ke halaman edit & proses hapus --}}
+                                            <a href="{{ route('ppds.edit', $ppds->id) }}" class="me-3 text-primary"
+                                                data-bs-container="#tooltip-container-{{ $ppds->id }}" data-bs-toggle="tooltip"
+                                                data-bs-placement="top" title="Edit"><i
+                                                    class="mdi mdi-pencil font-size-18"></i></a>
+                                            <a href="#" class="text-danger"
+                                                onclick="event.preventDefault(); showDeleteConfirmation({{ $ppds->id }});"
+                                                data-bs-container="#tooltip-container-{{ $ppds->id }}" data-bs-toggle="tooltip"
+                                                data-bs-placement="top" title="Hapus"><i
+                                                    class="mdi mdi-trash-can font-size-18"></i></a>
+                                            <form id="delete-form-{{ $ppds->id }}" action="{{ route('ppds.destroy', $ppds->id) }}" method="POST" style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+							</tbody>
+						</table>
 					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-search-input" class="col-sm-2 col-form-label">AGAMA</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="search" placeholder="How do I shoot web"
-								id="example-search-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-email-input" class="col-sm-2 col-form-label">Email</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="email" placeholder="bootstrap@example.com"
-								id="example-email-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-url-input" class="col-sm-2 col-form-label">URL</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="url" placeholder="https://getbootstrap.com"
-								id="example-url-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-tel-input" class="col-sm-2 col-form-label">Telephone</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="tel" placeholder="1-(555)-555-5555"
-								id="example-tel-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-password-input" class="col-sm-2 col-form-label">Password</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="password" value="hunter2" id="example-password-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-number-input" class="col-sm-2 col-form-label">Number</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="number" value="42" id="example-number-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-datetime-local-input" class="col-sm-2 col-form-label">Date and time</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="datetime-local" value="2011-08-19T13:45:00"
-								id="example-datetime-local-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-date-input" class="col-sm-2 col-form-label">Date</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="date" value="2011-08-19" id="example-date-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-month-input" class="col-sm-2 col-form-label">Month</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="month" value="2020-03" id="example-month-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-week-input" class="col-sm-2 col-form-label">Week</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="week" value="2020-W14" id="example-week-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-time-input" class="col-sm-2 col-form-label">Time</label>
-						<div class="col-sm-10">
-							<input class="form-control" type="time" value="13:45:00" id="example-time-input">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label for="example-color-input" class="col-sm-2 col-form-label">Color</label>
-						<div class="col-sm-10">
-							<input type="color" class="form-control form-control-color w-100" id="example-color-input"
-								value="#5664d2" title="Choose your color">
-						</div>
-					</div>
-					<!-- end row -->
-					<div class="row mb-3">
-						<label class="col-sm-2 col-form-label">Select</label>
-						<div class="col-sm-10">
-							<select class="form-select" aria-label="Default select example">
-								<option selected="">Open this select menu</option>
-								<option value="1">One</option>
-								<option value="2">Two</option>
-								<option value="3">Three</option>
-							</select>
-						</div>
-					</div>
-					<!-- end row -->
 				</div>
 			</div>
 		</div> <!-- end col -->
 	</div>
 	<!-- end row -->
-
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title">Sizing</h4>
-					<p class="card-title-desc">Set heights using classes like <code>.form-control-lg</code> and
-						<code>.form-control-sm</code>.</p>
-					<div>
-						<div class="mb-4">
-							<input class="form-control" type="text" placeholder="Default input">
-						</div>
-						<div class="mb-4">
-							<input class="form-control form-control-sm" type="text" placeholder=".form-control-sm">
-						</div>
-						<div>
-							<input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<!-- end col -->
-		<div class="col-lg-6">
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title">Range Inputs</h4>
-					<p class="card-title-desc">Set horizontally scrollable range inputs using
-						<code>.form-control-range</code>.</p>
-
-					<div>
-						<h5 class="font-size-14">Example</h5>
-						<input type="range" class="form-range" id="formControlRange">
-					</div>
-					<div class="mt-4">
-						<h5 class="font-size-14">Custom Range</h5>
-						<input type="range" class="form-range" id="customRange1">
-
-						<input type="range" class="form-range mt-3" min="0" max="5" id="customRange2">
-					</div>
-				</div>
-			</div><!-- end cardbody -->
-		</div><!-- end card -->
-	</div>
-	<!-- end row -->
-
-	<div class="row">
-		<div class="col-xl-6">
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title mb-4">Checkboxes</h4>
-
-					<div class="row">
-						<div class="col-md-5">
-							<div>
-								<h5 class="font-size-14 mb-4">Form Checkboxes</h5>
-								<div class="form-check mb-3">
-									<input class="form-check-input" type="checkbox" id="formCheck1">
-									<label class="form-check-label" for="formCheck1">
-										Form Checkbox
-									</label>
-								</div>
-								<div class="form-check">
-									<input class="form-check-input" type="checkbox" id="formCheck2" checked>
-									<label class="form-check-label" for="formCheck2">
-										Form Checkbox checked
-									</label>
-								</div>
-							</div>
-						</div>
-						<div class="col-md-6 ms-auto">
-							<div class="mt-4 mt-lg-0">
-								<h5 class="font-size-14 mb-4">Form Checkboxes Right</h5>
-								<div>
-									<div class="form-check form-check-right mb-3">
-										<input class="form-check-input" type="checkbox" id="formCheckRight1">
-										<label class="form-check-label" for="formCheckRight1">
-											Form Checkbox Right
-										</label>
-									</div>
-								</div>
-								<div>
-									<div class="form-check form-check-right">
-										<input class="form-check-input" type="checkbox" id="formCheckRight2" checked>
-										<label class="form-check-label" for="formCheckRight2">
-											Form Checkbox Right checked
-										</label>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="col-xl-6">
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title mb-4">Radios</h4>
-
-					<div class="row">
-						<div class="col-md-5">
-							<div>
-								<h5 class="font-size-14 mb-4">Form Radios</h5>
-								<div class="form-check mb-3">
-									<input class="form-check-input" type="radio" name="formRadios" id="formRadios1"
-										checked>
-									<label class="form-check-label" for="formRadios1">
-										Form Radio
-									</label>
-								</div>
-								<div class="form-check">
-									<input class="form-check-input" type="radio" name="formRadios" id="formRadios2">
-									<label class="form-check-label" for="formRadios2">
-										Form Radio checked
-									</label>
-								</div>
-							</div>
-						</div>
-						<div class="col-md-6 ms-auto">
-							<div class="mt-4 mt-lg-0">
-								<h5 class="font-size-14 mb-4">Form Radios Right</h5>
-								<div>
-									<div class="form-check form-check-right mb-3">
-										<input class="form-check-input" type="radio" name="formRadiosRight"
-											id="formRadiosRight1" checked>
-										<label class="form-check-label" for="formRadiosRight1">
-											Form Radio Right
-										</label>
-									</div>
-								</div>
-
-								<div>
-									<div class="form-check form-check-right">
-										<input class="form-check-input" type="radio" name="formRadiosRight"
-											id="formRadiosRight2">
-										<label class="form-check-label" for="formRadiosRight2">
-											Form Radio Right checked
-										</label>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- end row -->
-
-	<div class="row">
-		<div class="col-lg-6">
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title">Switches</h4>
-					<p class="card-title-desc">A switch has the markup of a custom checkbox but uses the
-						<code>.form-switch</code> class to render a toggle switch. Switches also support the
-						<code>disabled</code> attribute.</p>
-					<div class="form-check form-switch mb-3" dir="ltr">
-						<input type="checkbox" class="form-check-input" id="customSwitch1" checked>
-						<label class="form-check-label" for="customSwitch1">Toggle this switch element</label>
-					</div>
-					<div class="form-check form-switch" dir="ltr">
-						<input type="checkbox" class="form-check-input" disabled id="customSwitch2">
-						<label class="form-check-label" for="customSwitch2">Disabled switch element</label>
-					</div>
-
-				</div>
-			</div>
-		</div>
-
-		<div class="col-lg-6">
-			<div class="card">
-				<div class="card-body">
-					<h4 class="card-title">File browser</h4>
-					<p class="card-title-desc">The file input is the most gnarly of the bunch and requires additional
-						JavaScript if you’d like to hook them up with functional <em>Choose file…</em> and selected file
-						name text.</p>
-					<div class="input-group">
-						<input type="file" class="form-control" id="customFile">
-					</div>
-				</div>
-			</div>
-
-		</div>
-	</div>
-	<!-- end row -->
 @endsection
 @push('script')
-	<!-- bs custom file input plugin -->
-	<script src="{{ URL::asset('build/libs/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
+	<!-- Required datatable js -->
+    <script src="{{ URL::asset('build/libs/datatables.net/js/jquery.dataTables.min.js') }}"></script>
+    {{-- Sweet Alert --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ URL::asset('build/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
 
-	<script src="{{ URL::asset('build/js/pages/form-element.init.js') }}"></script>
+    <!-- Responsive examples -->
+    <script src="{{ URL::asset('build/libs/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ URL::asset('build/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js') }}"></script>
+
 	<script src="{{ URL::asset('build/js/app.js') }}"></script>
-@endpush
 
+    {{-- Inisialisasi DataTables & Tooltip --}}
+    <script>
+        $(document).ready(function() {
+            $('.datatable').DataTable({
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Cari data..."
+                }
+            });
+
+            // Inisialisasi tooltip Bootstrap
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            @if (session('success'))
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    icon: 'success',
+                    confirmButtonColor: '#5664d2',
+                    confirmButtonText: 'Oke'
+                });
+            @endif
+        });
+
+        // Fungsi untuk menampilkan konfirmasi hapus dengan SweetAlert2
+        function showDeleteConfirmation(id) {
+            Swal.fire({
+                title: 'Yakin ingin menghapus data ini?',
+                text: "Data yang sudah dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#5664d2', // Warna primer dari tema
+                cancelButtonColor: '#ff3d60',  // Warna danger dari tema
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Jika dikonfirmasi, submit form hapus yang sesuai
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            })
+        }
+    </script>
+@endpush

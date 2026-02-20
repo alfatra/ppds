@@ -15,7 +15,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/users/{user}/update-role', [UserController::class, 'updateRole'])->name('users.updateRole');
 });
 
-// PENTING: Rute spesifik seperti ini harus didefinisikan SEBELUM rute catch-all '{any}'
-Route::get('/ppds/form', [PpdsController::class, 'create'])->name('ppds.form')->middleware('auth');
+// Grup Rute untuk Manajemen PPDS
+Route::middleware('auth')->prefix('ppds')->name('ppds.')->group(function () {
+    Route::get('/', [PpdsController::class, 'index'])->name('index'); // Halaman daftar data (tabel)
+    Route::get('/create', [PpdsController::class, 'create'])->name('create'); // Halaman form tambah data
+    Route::post('/', [PpdsController::class, 'store'])->name('store'); // Rute untuk memproses simpan data
+    // Rute untuk menampilkan form edit
+    Route::get('/{ppds}/edit', [PpdsController::class, 'edit'])->name('edit');
+    // Rute untuk memproses update data
+    Route::put('/{ppds}', [PpdsController::class, 'update'])->name('update');
+    // Rute untuk menghapus data
+    Route::delete('/{ppds}', [PpdsController::class, 'destroy'])->name('destroy');
+
+});
 
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
