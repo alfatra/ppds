@@ -12,7 +12,13 @@
     <link rel="shortcut icon" href="{{ URL::asset('build/images/favicon.ico') }}">
 
     @include('layouts.head-css')
-</head>
+            <!-- ... file-file CSS lainnya ... -->
+
+        <!-- Sweet Alert-->
+        <link href="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
+
+    </head>
+
 
 <body data-sidebar="dark">
     <!-- Begin page -->
@@ -32,5 +38,17 @@
 
     @include('layouts.right-sidebar')
     @include('layouts.vendor-scripts')
+        <!-- ... file-file JavaScript lainnya ... -->
+
+    <!-- Sweet Alerts js -->
+    <script src="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.js') }}"></script>
+
+    <!-- Ini adalah tempat script dari halaman lain akan dimasukkan -->
+    @stack('scripts')
+
+    <!-- App js -->
+    <script src="{{ URL::asset('build/js/app.js') }}"></script>
+
 </body>
 </html>
+

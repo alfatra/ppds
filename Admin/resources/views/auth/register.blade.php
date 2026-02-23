@@ -24,7 +24,7 @@
                                             </div>
 
                                             <h4 class="font-size-18 mt-4">Register account</h4>
-                                            <p class="text-muted">Silahkan daftar untuk membuat akun Anda.</p>
+                                            <p class="text-muted">Silahkan daftar untuk membuat akun ppds anda.</p>
                                         </div>
 
                                         <div class="p-2 mt-5">
@@ -99,8 +99,8 @@
                                         <div class="mt-5 text-center">
                                             <p>Already have an account ? <a href="{{ route('login') }}"
                                                     class="fw-medium text-primary"> Login</a> </p>
-                                            <p>© {{ date('Y') }} Nazox. Crafted with <i
-                                                    class="mdi mdi-heart text-danger"></i> by Themesdesign
+                                            <p>© {{ date('Y') }} Dibuat dengan <i
+                                                    class="mdi mdi-heart text-danger"></i> oleh tim SIMRS
                                             </p>
                                         </div>
                                     </div>

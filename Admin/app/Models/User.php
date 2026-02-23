@@ -25,6 +25,10 @@ class User extends Authenticatable
         'is_active',
     ];
 
+    const ROLE_SUPERADMIN = 'superadmin';
+    const ROLE_ADMIN = 'admin';
+    const ROLE_USER = 'user';
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -53,6 +57,26 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_SUPERADMIN;
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === self::ROLE_USER;
+    }
+
+    /**
+     * Check if the user has management privileges (admin or superadmin).
+     *
+     * @return bool
+     */
+    public function canManage(): bool
+    {
+        return $this->isAdmin() || $this->isSuperAdmin();
     }
 }

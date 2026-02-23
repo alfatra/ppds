@@ -23,7 +23,7 @@
                                             </div>
 
                                             <h4 class="font-size-18 mt-4">SELAMAT DATANG !</h4>
-                                            <p class="text-muted">Silahkan Login.</p>
+                                            <p class="text-muted">Silahkan Login Akun ppds.</p>
                                         </div>
 
                                         <div class="p-2 mt-5">
@@ -81,8 +81,8 @@
                                             <p>Don't have an account ? <a href="{{ route('register') }}"
                                                     class="fw-medium text-primary"> Register </a> </p>
                                             <p>©
-                                                {{ date('Y') }} Nazox. Crafted with <i
-                                                    class="mdi mdi-heart text-danger"></i> by Themesdesign
+                                                {{ date('Y') }} Dibuat dengan <i
+                                                    class="mdi mdi-heart text-danger"></i> oleh tim SIMRS
                                             </p>
                                         </div>
                                     </div>
