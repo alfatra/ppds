@@ -37,6 +37,7 @@
 									<th>Telepon</th>
 									<th>Agama</th>
 									<th>Tanggal Bergabung</th>
+                                    <th>Berkas</th>
 									<th style="width: 120px;">Aksi</th>
 								</tr>
 							</thead>
@@ -54,6 +55,12 @@
                                         <td>{{ $ppds->telepon ?? '-' }}</td>
                                         <td>{{ $ppds->agama ?? '-' }}</td>
                                         <td>{{ $ppds->created_at->format('d M, Y') }}</td>
+                                        <td>@if($ppds->path_berkas)
+                                                 <a href="{{ Storage::url($ppds->path_berkas) }}" class="btn btn-sm btn-info" target="_blank">Download</a>
+                                                  @else
+                                                   <span class="badge bg-secondary">Tidak Ada</span>
+                                                   @endif
+                                                </td>
                                         <td id="tooltip-container-{{ $ppds->id }}">
                                             {{-- TODO: Arahkan ke halaman edit & proses hapus --}}
                                             <a href="{{ route('ppds.edit', $ppds->id) }}" class="me-3 text-primary"

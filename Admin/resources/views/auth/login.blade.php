@@ -3,6 +3,9 @@
     Login
 @endsection
 @section('content')
+<!-- Sweet Alert-->
+<link href="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
+
     <div>
         <div class="container-fluid p-0">
             <div class="row g-0">
@@ -100,3 +103,21 @@
         </div>
     </div>
 @endsection
+{{-- Tambahkan kode ini di bagian bawah file view login Anda --}}
+{{-- Ganti script lama Anda dengan yang ini --}}
+
+<!-- Sweet Alert-->
+<script src="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.js') }}"></script>
+
+@if(session('inactive_error'))
+<script>
+    // Sekarang library sudah dimuat, Swal akan terdefinisi
+    Swal.fire({
+        title: 'Gagal Login',
+        text: "{{ session('inactive_error') }}",
+        icon: 'warning',
+        confirmButtonColor: '#556ee6', // Warna tombol sesuai tema
+        confirmButtonText: 'Mengerti'
+    });
+</script>
+@endif

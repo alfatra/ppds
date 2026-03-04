@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage; // Import Storage facade
 use App\Models\Ppds; // Import model Ppds
 
 class PpdsController extends Controller
@@ -44,7 +45,15 @@ public function edit(Ppds $ppds)
             'telepon' => 'nullable|string|max:15',
             'agama' => 'nullable|string',
             'alamat' => 'nullable|string',
+            'berkas' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:5120', // Validasi file (maks 5MB)
         ]);
+
+        // 2. Handle file upload jika ada
+        if ($request->hasFile('berkas')) {
+            // Simpan file ke storage/app/public/berkas_ppds dan dapatkan path-nya
+            $path = $request->file('berkas')->store('berkas_ppds', 'public');
+            $validatedData['path_berkas'] = $path;
+        }
 
         // 2. Simpan data ke database
         Ppds::create($validatedData);
@@ -62,7 +71,20 @@ public function update(Request $request, Ppds $ppds)
         'telepon' => 'nullable|string|max:20',
         'agama' => 'nullable|string|max:50',
         'alamat' => 'nullable|string',
+        'berkas' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:5120',
     ]);
+
+    // Handle file upload jika ada file baru
+    if ($request->hasFile('berkas')) {
+        // Hapus file lama jika ada
+        if ($ppds->path_berkas) {
+            Storage::disk('public')->delete($ppds->path_berkas);
+        }
+
+        // Simpan file baru dan update path
+        $path = $request->file('berkas')->store('berkas_ppds', 'public');
+        $validatedData['path_berkas'] = $path;
+    }
 
     $ppds->update($validatedData);
 
@@ -74,6 +96,11 @@ public function update(Request $request, Ppds $ppds)
      */
     public function destroy(Ppds $ppds)
     {
+        // Hapus file terkait dari storage jika ada
+        if ($ppds->path_berkas) {
+            Storage::disk('public')->delete($ppds->path_berkas);
+        }
+
         // Hapus data
         $ppds->delete();
 

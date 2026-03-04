@@ -67,9 +67,10 @@ class LoginController extends Controller
         $user = User::where($this->username(), $request->{$this->username()})->first();
 
         if ($user && Hash::check($request->password, $user->password) && !$user->is_active) {
-            throw ValidationException::withMessages([
-                $this->username() => ['Akun Anda belum aktif. Silakan hubungi Admin untuk aktivasi.'],
-            ]);
+            // Arahkan kembali dengan pesan error khusus untuk akun tidak aktif
+            return redirect()->route('login')
+                ->withInput($request->only($this->username(), 'remember'))
+                ->with('inactive_error', 'Akun Anda belum aktif. Silakan hubungi Admin untuk aktivasi.');
         }
 
         // Default failed login response

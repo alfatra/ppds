@@ -20,5 +20,11 @@ class Ppds extends Model
         'telepon',
         'agama',
         'alamat',
+        'path_berkas', // Tambahkan field untuk menyimpan path berkas
+        
     ];
+      protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+      ];
 }

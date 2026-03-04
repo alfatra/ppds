@@ -2,10 +2,27 @@
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PpdsController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
 
+// Authentication Routes
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [RegisterController::class, 'register']);
+    Route::get('/password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+    Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('/password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+});
 
-Auth::routes();
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+});
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'root'])->name('root');
 
@@ -22,6 +39,9 @@ Route::middleware(['auth', 'role:superadmin,admin'])->prefix('admin')->name('adm
 Route::prefix('ppds')->name('ppds.')->middleware('auth')->group(function () {
     // Rute untuk melihat data, bisa diakses semua role yang sudah login
     Route::get('/', [PpdsController::class, 'index'])->name('index');
+
+    // Logbook SOAP medical records
+    Route::resource('soap-logs', \App\Http\Controllers\SoapLogController::class);
     
     // Rute untuk manajemen (create, edit, delete), hanya untuk admin & superadmin
     Route::middleware('role:superadmin,admin')->group(function () {

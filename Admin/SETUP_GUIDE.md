@@ -116,6 +116,25 @@ Admin/
 └── .env             # Environment configuration
 ```
 
+## 🩺 SOAP Logbook Feature
+
+A "Logbook SOAP" module has been added as a sub-section under the PPDS menu. 
+
+- Accessible via sidebar menu **Logbook SOAP**.
+- Users with `doctor`, `resident`, or `admin` roles can view and manage entries.
+- CRUD interface built with simple forms (Subjective, Objective, Assessment, Plan).
+
+**To add a record:**
+1. Click **Logbook SOAP** in sidebar
+2. Click **New Entry**
+3. Fill in fields and save
+
+**Model location:** `app/Models/SoapLog.php`  
+**Controller:** `app/Http/Controllers/SoapLogController.php`  
+**Views:** `resources/views/soap_logs/*`
+
+The database table `soap_logs` contains the columns: `patient_id`, `doctor_id`, `visit_date`, `subjective`, `objective`, `assessment`, `plan`, plus audit fields.
+
 ## 🔧 Troubleshooting
 
 ### Database Connection Error

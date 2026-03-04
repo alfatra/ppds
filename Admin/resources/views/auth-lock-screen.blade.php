@@ -29,7 +29,7 @@
 
                                                     <div class="user-thumb text-center mb-5">
                                                         <img src="{{ URL::asset('build/images/users/avatar-2.jpg') }}" class="rounded-circle img-thumbnail avatar-md" alt="thumbnail">
-                                                        <h5 class="font-size-15 mt-3">Jacob Lopez</h5>
+                                                        <h5 class="font-size-15 mt-3">{{ Auth::user()->name }}</h5>
                                                     </div>
                             
                                                     <div class="mb-3 auth-form-group-custom mb-4">

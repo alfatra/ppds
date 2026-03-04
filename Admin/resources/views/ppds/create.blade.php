@@ -15,7 +15,7 @@
 				<div class="card-body p-4">
 
 					{{-- Mengarahkan form ke route 'ppds.store' --}}
-					<form action="{{ isset($ppds) ? route('ppds.update', $ppds->id) : route('ppds.store') }}" method="POST">
+					<form action="{{ isset($ppds) ? route('ppds.update', $ppds->id) : route('ppds.store') }}" method="POST" enctype="multipart/form-data">
 						@csrf
 						@if(isset($ppds))
 							@method('PUT')
@@ -65,6 +65,20 @@
 								</div>
 							</div>
 						</div>
+						<div class="row mb-3">
+                            <label for="berkas" class="col-sm-3 col-form-label">Upload Berkas</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" type="file" name="berkas" id="berkas">
+                                @if(isset($ppds) && $ppds->path_berkas)
+                                    <div class="mt-2">
+                                        <small>Berkas saat ini: 
+                                            <a href="{{ Storage::url($ppds->path_berkas) }}" target="_blank">Lihat Berkas</a>
+                                        </small>
+                                    </div>
+                                @endif
+                                <div class="form-text">Tipe file yang diizinkan: PDF, DOC, DOCX, JPG, PNG. Maksimal 5MB.</div>
+                            </div>
+                        </div>
 						<div class="row mt-4">
 							<div class="col-12 text-end">
 								<a href="{{ route('ppds.index') }}" class="btn btn-outline-secondary w-md">Batal</a>

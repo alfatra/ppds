@@ -23,6 +23,28 @@
                        </a>
                     </li>
 
+                    {{-- Menu ini hanya akan muncul untuk role 'admin' dan 'superadmin' --}}
+                    @if(in_array(Auth::user()->role, ['admin', 'superadmin']))
+                    <li>
+                        <a href="{{ route('admin.users.index') }}" class="waves-effect">
+                            <i class="ri-user-settings-line"></i>
+                            <span>Manajemen Pengguna</span>
+                        </a>
+                    </li>
+                    @endif
+
+            <li>
+                <a href="javascript: void(0);" class="has-arrow waves-effect">
+                    <i class="fas fa-notes-medical"></i>
+                    <span>Loogbook</span>
+                </a>
+                <ul class="sub-menu" aria-expanded="false">
+                    <li><a href="#">Kegiatan Harian</a></li>
+                    <li><a href="{{ route('ppds.soap-logs.index') }}">Laporan SOAP</a></li>
+                    <li><a href="#">Tindakan Medis</a></li>
+                </ul>
+            </li>
+
 
                 <li>
                     <a href="calendar" class=" waves-effect">
@@ -234,22 +256,6 @@
                     <ul class="sub-menu" aria-expanded="false">
                         <li><a href="maps-google">Google Maps</a></li>
                         <li><a href="maps-vector">Vector Maps</a></li>
-                    </ul>
-                </li>
-
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="ri-share-line"></i>
-                        <span>Multi Level</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="true">
-                        <li><a href="javascript: void(0);">Level 1.1</a></li>
-                        <li><a href="javascript: void(0);" class="has-arrow">Level 1.2</a>
-                            <ul class="sub-menu" aria-expanded="true">
-                                <li><a href="javascript: void(0);">Level 2.1</a></li>
-                                <li><a href="javascript: void(0);">Level 2.2</a></li>
-                            </ul>
-                        </li>
                     </ul>
                 </li>
 
