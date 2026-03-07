@@ -73,4 +73,27 @@ class UserController extends Controller
 
         return back()->with('success', "Pengguna berhasil {$status}.");
     }
+
+    /**
+     * Remove the specified user from storage.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(User $user)
+    {
+        // Larangan: Tidak bisa menghapus diri sendiri
+        if ($user->id === Auth::id()) {
+            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
+
+        // Larangan: Admin tidak boleh menghapus Superadmin
+        if ($user->isSuperAdmin() && Auth::user()->isAdmin()) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk menghapus akun Super Admin.');
+        }
+
+        $user->delete();
+
+        return back()->with('success', 'Pengguna berhasil dihapus secara permanen.');
+    }
 }

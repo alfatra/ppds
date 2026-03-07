@@ -55,12 +55,16 @@
                                         <td>{{ $ppds->telepon ?? '-' }}</td>
                                         <td>{{ $ppds->agama ?? '-' }}</td>
                                         <td>{{ $ppds->created_at->format('d M, Y') }}</td>
-                                        <td>@if($ppds->path_berkas)
-                                                 <a href="{{ Storage::url($ppds->path_berkas) }}" class="btn btn-sm btn-info" target="_blank">Download</a>
-                                                  @else
-                                                   <span class="badge bg-secondary">Tidak Ada</span>
-                                                   @endif
-                                                </td>
+                                        <td>
+                                            @if($ppds->path_berkas)
+                                                <div class="d-flex gap-2">
+                                                    <a href="{{ Storage::url($ppds->path_berkas) }}" class="btn btn-sm btn-outline-primary" target="_blank">Lihat</a>
+                                                    <a href="{{ route('ppds.download', $ppds->id) }}" class="btn btn-sm btn-info">Download</a>
+                                                </div>
+                                            @else
+                                                <span class="badge bg-secondary">Tidak Ada</span>
+                                            @endif
+                                        </td>
                                         <td id="tooltip-container-{{ $ppds->id }}">
                                             {{-- TODO: Arahkan ke halaman edit & proses hapus --}}
                                             <a href="{{ route('ppds.edit', $ppds->id) }}" class="me-3 text-primary"
@@ -98,8 +102,6 @@
     <!-- Responsive examples -->
     <script src="{{ URL::asset('build/libs/datatables.net-responsive/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ URL::asset('build/libs/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js') }}"></script>
-
-	<script src="{{ URL::asset('build/js/app.js') }}"></script>
 
     {{-- Inisialisasi DataTables & Tooltip --}}
     <script>

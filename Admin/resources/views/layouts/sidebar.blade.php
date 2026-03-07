@@ -59,23 +59,6 @@
                         <span>Chat</span>
                     </a>
                 </li>
-
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="ri-store-2-line"></i>
-                        <span>Ecommerce</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="ecommerce-products">Products</a></li>
-                        <li><a href="ecommerce-product-detail">Product Detail</a></li>
-                        <li><a href="ecommerce-orders">Orders</a></li>
-                        <li><a href="ecommerce-customers">Customers</a></li>
-                        <li><a href="ecommerce-cart">Cart</a></li>
-                        <li><a href="ecommerce-checkout">Checkout</a></li>
-                        <li><a href="ecommerce-shops">Shops</a></li>
-                        <li><a href="ecommerce-add-product">Add Product</a></li>
-                    </ul>
-                </li>
                 
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -86,13 +69,6 @@
                         <li><a href="email-inbox">Inbox</a></li>
                         <li><a href="email-read">Read Email</a></li>
                     </ul>
-                </li>
-
-                <li>
-                    <a href="apps-kanban-board" class=" waves-effect">
-                        <i class="ri-artboard-2-line"></i>
-                        <span>Kanban Board</span>
-                    </a>
                 </li>
 
                 <li>

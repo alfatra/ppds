@@ -33,12 +33,14 @@ Route::middleware(['auth', 'role:superadmin,admin'])->prefix('admin')->name('adm
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::patch('/users/{user}/update-role', [UserController::class, 'updateRole'])->name('users.updateRole');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 // Grup Rute untuk Manajemen PPDS
 Route::prefix('ppds')->name('ppds.')->middleware('auth')->group(function () {
     // Rute untuk melihat data, bisa diakses semua role yang sudah login
     Route::get('/', [PpdsController::class, 'index'])->name('index');
+    Route::get('/{ppds}/download', [PpdsController::class, 'downloadBerkas'])->name('download');
 
     // Logbook SOAP medical records
     Route::resource('soap-logs', \App\Http\Controllers\SoapLogController::class);

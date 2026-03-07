@@ -1,27 +1,19 @@
 @extends('layouts.master')
 
-@section('title', 'Manajemen Pengguna')
+@section('title')
+    Manajemen Pengguna
+@endsection
 
 @section('content')
-
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0 font-size-18">Manajemen Pengguna</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('root') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Pengguna</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </div>
+    <x-breadcrumb pagetitle="Admin" title="Manajemen Pengguna" />
 
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
+                    <h4 class="card-title">Daftar Pengguna Sistem</h4>
+                    <p class="card-title-desc">Kelola role, status aktivasi, dan hapus akun pengguna.</p>
+
                     @if (session('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}
@@ -36,33 +28,27 @@
                     @endif
 
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover">
-                            <thead class="table-light">
+                        <table class="table table-striped table-bordered" style="width:100%">
+                            <thead>
                                 <tr>
-                                    <th>No</th>
                                     <th>Nama</th>
                                     <th>Email</th>
                                     <th>Role</th>
                                     <th>Status</th>
-                                    <th>Aksi</th>
+                                    <th style="width: 100px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($users as $user)
+                                @foreach ($users as $user)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>
-                                            <form action="{{ route('admin.users.updateRole', $user) }}" method="POST" class="d-flex align-items-center">
+                                            <form action="{{ route('admin.users.updateRole', $user->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('PATCH')
-                                                <select name="role" class="form-select form-select-sm">
+                                                <select name="role" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 120px;">
                                                     @foreach ($roles as $role)
-                                                        {{-- Hanya Superadmin yang bisa melihat/memberi role Superadmin --}}
-                                                        @if ($role === \App\Models\User::ROLE_SUPERADMIN && !Auth::user()->isSuperAdmin())
-                                                            @continue
-                                                        @endif
                                                         <option value="{{ $role }}" {{ $user->role == $role ? 'selected' : '' }}>
                                                             {{ ucfirst($role) }}
                                                         </option>
@@ -71,116 +57,59 @@
                                             </form>
                                         </td>
                                         <td>
-                                            @if ($user->is_active)
-                                                <span class="badge bg-success">Aktif</span>
-                                            @else
-                                                <span class="badge bg-danger">Tidak Aktif</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <form action="{{ route('admin.users.activate', $user) }}" method="POST" class="d-inline form-confirm-action">
+                                            <form action="{{ route('admin.users.activate', $user->id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('PATCH')
                                                 @if ($user->is_active)
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Nonaktifkan">
-                                                        <i class="fas fa-times-circle"></i>
-                                                    </button>
+                                                    <button type="submit" class="btn btn-sm btn-success">Aktif</button>
                                                 @else
-                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Aktifkan">
-                                                        <i class="fas fa-check-circle"></i>
-                                                    </button>
+                                                    <button type="submit" class="btn btn-sm btn-danger">Tidak Aktif</button>
                                                 @endif
                                             </form>
                                         </td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteConfirmation({{ $user->id }})">
+                                                <i class="mdi mdi-trash-can"></i>
+                                            </button>
+                                            <form id="delete-form-{{ $user->id }}" action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                        </td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center">Tidak ada data pengguna.</td>
-                                    </tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
-                    <div class="d-flex justify-content-end">
+                    <div class="mt-3">
                         {{ $users->links() }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
 @endsection
 
-@section('css')
-    <!-- Sweet Alert-->
-    <link href="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
-@endsection
-
-@section('script')
-    <!-- Sweet-Alert  -->
-    <script src="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.js') }}"></script>
+@push('script')
+    {{-- Sweet Alert --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // --- Konfirmasi untuk Aktifkan/Nonaktifkan ---
-            document.querySelectorAll('.form-confirm-action').forEach(form => {
-                form.addEventListener('submit', function (event) {
-                    event.preventDefault(); // Mencegah form submit secara langsung
-
-                    const button = this.querySelector('button[type="submit"]');
-                    const isActivating = button.classList.contains('btn-outline-success');
-                    const actionText = isActivating ? 'mengaktifkan' : 'menonaktifkan';
-                    const verbText = isActivating ? 'Aktifkan' : 'Nonaktifkan';
-                    const userName = this.closest('tr').querySelector('td:nth-child(2)').textContent.trim();
-
-                    Swal.fire({
-                        title: 'Konfirmasi Tindakan',
-                        html: `Apakah Anda yakin ingin <b>${actionText}</b> pengguna <br> "<b>${userName}</b>"?`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: isActivating ? '#28a745' : '#dc3545',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: `Ya, ${verbText}!`,
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            this.submit(); // Jika dikonfirmasi, lanjutkan submit form
-                        }
-                    });
-                });
-            });
-
-            // --- Konfirmasi untuk Perubahan Role ---
-            let previousRoleIndex;
-            document.querySelectorAll('select[name="role"]').forEach(select => {
-                select.addEventListener('focus', function () {
-                    previousRoleIndex = this.selectedIndex;
-                });
-
-                select.addEventListener('change', function (event) {
-                    const form = this.form;
-                    const userName = this.closest('tr').querySelector('td:nth-child(2)').textContent.trim();
-                    const newRole = this.options[this.selectedIndex].text.trim();
-
-                    Swal.fire({
-                        title: 'Konfirmasi Perubahan Role',
-                        html: `Ubah role untuk "<b>${userName}</b>" menjadi "<b>${newRole}</b>"?`,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#556ee6',
-                        cancelButtonColor: '#74788d',
-                        confirmButtonText: 'Ya, Ubah!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        } else {
-                            // Jika dibatalkan, kembalikan pilihan ke nilai semula
-                            this.selectedIndex = previousRoleIndex;
-                        }
-                    });
-                });
-            });
-        });
+        function showDeleteConfirmation(id) {
+            Swal.fire({
+                title: 'Yakin ingin menghapus akun ini?',
+                text: "Tindakan ini permanen dan tidak dapat dibatalkan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            })
+        }
     </script>
-@endsection
+@endpush

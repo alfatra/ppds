@@ -109,4 +109,18 @@ public function update(Request $request, Ppds $ppds)
                          ->with('success', 'Data PPDS berhasil dihapus.');
     }
 
+    /**
+     * Mengunduh file berkas yang terlampir.
+     */
+    public function downloadBerkas(Ppds $ppds)
+    {
+        // Pastikan file ada sebelum mencoba mengunduh
+        if ($ppds->path_berkas && Storage::disk('public')->exists($ppds->path_berkas)) {
+            return Storage::disk('public')->download($ppds->path_berkas);
+        }
+
+        // Jika file tidak ditemukan, kembalikan ke halaman sebelumnya dengan pesan error
+        return back()->with('error', 'File berkas tidak ditemukan.');
+    }
+
     }
