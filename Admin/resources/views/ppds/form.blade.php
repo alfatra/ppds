@@ -106,10 +106,34 @@
     {{-- Inisialisasi DataTables & Tooltip --}}
     <script>
         $(document).ready(function() {
-            $('.datatable').DataTable({
+            var table = $('.datatable').DataTable({
+                'columnDefs': [{
+                    'targets': 0, // Kolom pertama (checkbox)
+                    'orderable': false, // Nonaktifkan pengurutan untuk kolom ini
+                }],
                 language: {
                     search: "_INPUT_",
                     searchPlaceholder: "Cari data..."
+                }
+            });
+
+            // Handle klik pada checkbox "select all"
+            $('#select-all-check').on('click', function() {
+                // Dapatkan semua baris pada halaman saat ini
+                var rows = table.rows({ 'page': 'current' }).nodes();
+                // Check/uncheck semua checkbox pada baris tersebut
+                $('input[type="checkbox"]', rows).prop('checked', this.checked);
+            });
+
+            // Handle klik pada checkbox di body tabel untuk meng-update state "select all"
+            $('.datatable tbody').on('change', 'input[type="checkbox"]', function() {
+                // Jika checkbox ini tidak dicentang
+                if (!this.checked) {
+                    var el = $('#select-all-check').get(0);
+                    // Jika "select all" dicentang, hilangkan centangnya
+                    if (el && el.checked) {
+                        el.checked = false;
+                    }
                 }
             });
 

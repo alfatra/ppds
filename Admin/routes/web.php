@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DiagnosaController;
 use App\Http\Controllers\PpdsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -22,9 +24,17 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-});
 
+    // Rute untuk halaman profil
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    // Rute untuk halaman Absensi
+    Route::get('/attendance', [\App\Http\Controllers\AttendanceController::class, 'index'])->name('attendance.index');
+});
 Route::get('/', [App\Http\Controllers\HomeController::class, 'root'])->name('root');
+
+// Rute untuk API internal (proxy)
 
 Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('/dashboard', function () { return 'Superadmin Dashboard'; })->name('dashboard');
@@ -38,21 +48,19 @@ Route::middleware(['auth', 'role:superadmin,admin'])->prefix('admin')->name('adm
 
 // Grup Rute untuk Manajemen PPDS
 Route::prefix('ppds')->name('ppds.')->middleware('auth')->group(function () {
-    // Rute untuk melihat data, bisa diakses semua role yang sudah login
-    Route::get('/', [PpdsController::class, 'index'])->name('index');
-    Route::get('/{ppds}/download', [PpdsController::class, 'downloadBerkas'])->name('download');
-
-    // Logbook SOAP medical records
-    Route::resource('soap-logs', \App\Http\Controllers\SoapLogController::class);
-    
-    // Rute untuk manajemen (create, edit, delete), hanya untuk admin & superadmin
+    // Rute untuk melihat data, hanya untuk admin & superadmin
     Route::middleware('role:superadmin,admin')->group(function () {
+        Route::get('/', [PpdsController::class, 'index'])->name('index');
         Route::get('/create', [PpdsController::class, 'create'])->name('create');
         Route::post('/', [PpdsController::class, 'store'])->name('store');
         Route::get('/{ppds}/edit', [PpdsController::class, 'edit'])->name('edit');
         Route::put('/{ppds}', [PpdsController::class, 'update'])->name('update');
         Route::delete('/{ppds}', [PpdsController::class, 'destroy'])->name('destroy');
     });
+    
+    // Download dan SOAP logs dapat diakses semua user yang login
+    Route::get('/{ppds}/download', [PpdsController::class, 'downloadBerkas'])->name('download');
+    Route::resource('soap-logs', \App\Http\Controllers\SoapLogController::class)->parameters(['soap-logs' => 'log']);
 });
 
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');

@@ -79,4 +79,25 @@ class User extends Authenticatable
     {
         return $this->isAdmin() || $this->isSuperAdmin();
     }
+
+    /**
+     * Get the Ppds profile associated with this user.
+     * Relation based on email.
+     */
+    public function ppds()
+    {
+        return $this->hasOne(Ppds::class, 'email', 'email');
+    }
+
+    /**
+     * Get the profile photo URL for this user.
+     * Returns uploaded photo if available, otherwise returns default avatar.
+     */
+    public function getProfilePhotoUrl(): string
+    {
+        if ($this->ppds && $this->ppds->foto_profil) {
+            return \Illuminate\Support\Facades\Storage::url($this->ppds->foto_profil);
+        }
+        return \Illuminate\Support\Facades\URL::asset('build/images/users/avatar-2.jpg');
+    }
 }

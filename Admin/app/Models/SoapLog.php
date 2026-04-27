@@ -13,17 +13,18 @@ class SoapLog extends Model
      * @var array<int,string>
      */
     protected $fillable = [
-        'patient_id',
-        'doctor_id',
-        'visit_date',
-        'subjective',
-        'objective',
-        'assessment',
-        'plan',
-        'created_by',
-        'updated_by',
-        'diagnosis',
-    ];
+    'patient_id',
+    'doctor_id',
+    'visit_date',
+    'subjective',
+    'objective',
+    'assessment',
+    'plan',
+    'nama_dpjp', 
+    'created_by',
+    'updated_by',
+    'diagnosa_id',
+];
     
     /**
      * The attributes that should be cast.
@@ -48,4 +49,17 @@ class SoapLog extends Model
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
+    public function diagnosis()
+{
+    return $this->belongsTo(Diagnosis::class,'diagnosa_id','diagnose_id');
 }
+
+    /**
+     * Relasi ke user yang membuat data.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+}
+

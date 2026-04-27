@@ -172,6 +172,16 @@ File: Main Js File
             $('#status').fadeOut();
             $('#preloader').delay(350).fadeOut('slow');
         });
+
+        // Menampilkan loading screen saat menu diklik
+        $('#side-menu a, .navbar-nav a').on('click', function () {
+            var href = $(this).attr('href');
+            // Mengabaikan tautan kosong atau tautan dropdown agar loading tidak muncul keliru
+            if (href && href !== '#' && !href.startsWith('javascript')) {
+                $('#preloader').show();
+                $('#status').show();
+            }
+        });
     }
 
     function initSettings() {

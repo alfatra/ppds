@@ -44,7 +44,7 @@
 								<input class="form-control" type="tel" name="telepon" placeholder="081234567890" id="telepon" value="{{ old('telepon', $ppds->telepon ?? '') }}">
 							</div>
 						</div>
-
+						
 						<div class="mb-4">
 							<label for="agama" class="form-label">Agama</label>
 							<div class="input-group">

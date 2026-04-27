@@ -66,13 +66,21 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => User::ROLE_USER, // Default role is 'user'
             'is_active' => false,      // Account is inactive by default
         ]);
+
+        // Otomatis membuat data PPDS saat user baru melakukan registrasi
+        \App\Models\Ppds::create([
+            'nama_lengkap' => $data['name'],
+            'email' => $data['email'],
+        ]);
+
+        return $user;
     }
 
     /**

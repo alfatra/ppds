@@ -20,6 +20,7 @@
                 <th>Visit Date</th>
                 <th>Subjective</th>
                 <th>Diagnosa</th>
+                <th>Diinput Oleh</th>
                 <th class="text-center">Actions</th>
             </tr>
         </thead>
@@ -30,7 +31,14 @@
                     <td>{{ $log->doctor? $log->doctor->name : $log->doctor_id }}</td>
                     <td>  {{ $log->visit_date->format('d F Y, H:i') }}</td>
                     <td>{{ Str::limit($log->subjective,50) }}</td>
-                    <td>{{ $log->diagnosis ?? '-' }}</td>
+                    <td>
+                    @if($log->diagnosis)
+                        {{ $log->diagnosis->diagnose_id }} - {{ $log->diagnosis->diagnose_name }}
+                    @else
+                        -
+                    @endif
+                    </td>
+                    <td>{{ $log->creator->name ?? 'User Dihapus' }}</td>
                     <td class="text-center">
                         <a href="{{ route('ppds.soap-logs.show',$log) }}" class="btn btn-sm btn-info">View</a>
                         <a href="{{ route('ppds.soap-logs.edit',$log) }}" class="btn btn-sm btn-warning">Edit</a>

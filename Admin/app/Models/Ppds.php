@@ -20,8 +20,8 @@ class Ppds extends Model
         'telepon',
         'agama',
         'alamat',
-        'path_berkas', // Tambahkan field untuk menyimpan path berkas
-        
+        'path_berkas',
+        'foto_profil',
     ];
       protected $casts = [
         'created_at' => 'datetime',

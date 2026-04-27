@@ -32,7 +32,9 @@ return [
     ],
 
     'diagnosis_api' => [
-        'url' => env('DIAGNOSIS_API_URL'),
-    ],
+    'url' => env('API_DIAGNOSIS_URL'),
+    'consumer_id' => env('API_CONSUMER_ID'),
+    'consumer_password' => env('API_CONSUMER_PASSWORD'),
+],
 
 ];

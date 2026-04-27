@@ -10,15 +10,16 @@
     <meta content="Themesdesign" name="author" />
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ URL::asset('build/images/favicon.ico') }}">
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+</head>
     @include('layouts.head-css')
             <!-- ... file-file CSS lainnya ... -->
 
         <!-- Sweet Alert-->
         <link href="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
-
+                 
     </head>
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
 <body data-sidebar="dark">
     <!-- Begin page -->
@@ -45,9 +46,10 @@
 
     <!-- Ini adalah tempat script dari halaman lain akan dimasukkan -->
     @stack('scripts')
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- App js -->
     <script src="{{ URL::asset('build/js/app.js') }}"></script>
-
+    
 </body>
 </html>

@@ -27,7 +27,13 @@
 
                 <dt class="col-sm-3">Assessment</dt>
                 <dd class="col-sm-9"><pre>{{ $log->assessment }}</pre></dd>
-
+                <dt class="col-sm-3">Diagnosa</dt>
+                <dd class="col-sm-9">
+                @if($log->diagnosis)
+                    {{ $log->diagnosis->diagnose_id }} - {{ $log->diagnosis->diagnose_name }}
+                @else
+                @endif
+                </dd>
                 <dt class="col-sm-3">Plan</dt>
                 <dd class="col-sm-9"><pre>{{ $log->plan }}</pre></dd>
             </dl>

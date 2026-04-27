@@ -12,17 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('soap_logs', function (Blueprint $table) {
-            //
+            // Tambahkan field nama_dpjp setelah field plan hanya jika belum ada
+            if (!Schema::hasColumn('soap_logs', 'nama_dpjp')) {
+                $table->string('nama_dpjp')->nullable()->after('plan');
+            }
         });
     }
 
-    /**
+    /**+
      * Reverse the migrations.
      */
     public function down(): void
     {
         Schema::table('soap_logs', function (Blueprint $table) {
-            //
+            $table->dropColumn('nama_dpjp');
         });
     }
 };

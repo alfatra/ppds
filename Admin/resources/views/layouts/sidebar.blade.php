@@ -15,16 +15,19 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
-            
-                    <li>
-                        <a href="{{ route('ppds.index') }}" class="waves-effect">
-                        <i class="ri-user-add-line"></i>
-                      <span>Data PPDS</span>
-                       </a>
-                    </li>
 
-                    {{-- Menu ini hanya akan muncul untuk role 'admin' dan 'superadmin' --}}
-                    @if(in_array(Auth::user()->role, ['admin', 'superadmin']))
+                {{-- Menu Data PPDS hanya untuk admin dan superadmin --}}
+                @if(in_array(Auth::user()->role, ['admin', 'superadmin']))
+                <li>
+                    <a href="{{ route('ppds.index') }}" class="waves-effect">
+                        <i class="ri-user-add-line"></i>
+                        <span>Data PPDS</span>
+                    </a>
+                </li>
+                @endif
+
+                {{-- Menu Manajemen Pengguna hanya untuk admin dan superadmin --}}
+                @if(in_array(Auth::user()->role, ['admin', 'superadmin']))
                     <li>
                         <a href="{{ route('admin.users.index') }}" class="waves-effect">
                             <i class="ri-user-settings-line"></i>
@@ -43,6 +46,13 @@
                     <li><a href="{{ route('ppds.soap-logs.index') }}">Laporan SOAP</a></li>
                     <li><a href="#">Tindakan Medis</a></li>
                 </ul>
+            </li>
+
+            <li>
+                <a href="{{ route('attendance.index') }}" class="waves-effect">
+                    <i class="ri-fingerprint-line"></i>
+                    <span>Absensi</span>
+                </a>
             </li>
 
 
@@ -223,18 +233,7 @@
                         <li><a href="icons-fontawesome">Font awesome 5</a></li>
                     </ul>
                 </li>
-
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="ri-map-pin-line"></i>
-                        <span>Maps</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="maps-google">Google Maps</a></li>
-                        <li><a href="maps-vector">Vector Maps</a></li>
-                    </ul>
-                </li>
-
+                
             </ul>
         </div>
         <!-- Sidebar -->

@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('soap_logs', function (Blueprint $table) {
-            //
+        Schema::table('ppds', function (Blueprint $table) {
+            $table->string('foto_profil')->nullable()->after('email');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('soap_logs', function (Blueprint $table) {
-            //
+        Schema::table('ppds', function (Blueprint $table) {
+            $table->dropColumn('foto_profil');
         });
     }
 };
