@@ -9,10 +9,10 @@
             <h4 class="card-title mb-0">Edit SOAP Entry #{{ $log->id }}</h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('ppds.soap-logs.update',$log) }}" method="POST">
+            <form id="soap_log_form" action="{{ route('ppds.soap-logs.update',$log) }}" method="POST" novalidate>
                 @method('PUT')
                 @include('soap_logs.form')
-                <button class="btn btn-primary">Update</button>
+                <button type="submit" class="btn btn-primary">Update</button>
             </form>
         </div>
     </div>

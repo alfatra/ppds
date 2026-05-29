@@ -95,10 +95,15 @@ class RegisterController extends Controller
 
         event(new Registered($user = $this->create($request->all())));
 
-        $message = 'Registrasi berhasil. Akun Anda akan segera diaktifkan oleh Admin.';
+        $alert = [
+            'title' => 'Registrasi Berhasil',
+            'text' => 'Akun Anda sedang menunggu aktivasi oleh Admin atau Pembimbing.',
+            'icon' => 'success',
+        ];
 
         return $request->wantsJson()
-                    ? new JsonResponse(['message' => $message], 201)
-                    : redirect()->route('login')->with('success', $message);
+                    ? new JsonResponse(['message' => $alert['text']], 201)
+                    : redirect()->route('login')
+                        ->with('sweet_alert', $alert);
     }
 }

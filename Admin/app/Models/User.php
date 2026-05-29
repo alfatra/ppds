@@ -90,6 +90,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the SOAP logs created by this doctor.
+     */
+    public function soapLogs()
+    {
+        return $this->hasMany(SoapLog::class, 'doctor_id', 'id');
+    }
+
+    /**
      * Get the profile photo URL for this user.
      * Returns uploaded photo if available, otherwise returns default avatar.
      */

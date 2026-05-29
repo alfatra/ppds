@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -72,6 +73,31 @@ class UserController extends Controller
         $user->save();
 
         return back()->with('success', "Pengguna berhasil {$status}.");
+    }
+
+    /**
+     * Reset the specified user's password to default 123456.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function resetPassword(User $user)
+    {
+        // Larangan: Tidak bisa reset password diri sendiri
+        if ($user->id === Auth::id()) {
+            return back()->with('error', 'Anda tidak dapat me-reset password akun Anda sendiri.');
+        }
+
+        // Larangan: Admin tidak boleh me-reset password Superadmin
+        if ($user->isSuperAdmin() && Auth::user()->isAdmin()) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk me-reset password Super Admin.');
+        }
+
+        $user->update([
+            'password' => Hash::make('123456'),
+        ]);
+
+        return back()->with('success', "Password pengguna {$user->name} berhasil di-reset menjadi 123456.");
     }
 
     /**

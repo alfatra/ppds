@@ -14,6 +14,8 @@ class SoapLog extends Model
      */
     protected $fillable = [
     'patient_id',
+    'patient_name_manual',
+    'patient_registration_no',
     'doctor_id',
     'visit_date',
     'subjective',

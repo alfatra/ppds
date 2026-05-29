@@ -117,8 +117,8 @@ Profil Saya
 
                     <!-- Foto Profil Upload -->
                     <div class="mb-4">
-                        <label for="foto_profil" class="form-label">Foto Profil <span class="text-danger">*</span> (Ukuran 3x4)</label>
-                        <p class="text-muted small mb-2"><i class="ri-information-line"></i> Foto profil harus memiliki aspek rasio 3:4 (misal: 300x400, 600x800 px)</p>
+                        <label for="foto_profil" class="form-label">Foto Profil <span class="text-danger">*</span> (Akan dicrop menjadi 3x4)</label>
+                        <p class="text-muted small mb-2"><i class="ri-information-line"></i> Unggah foto apa saja; sistem akan menampilkan foto dalam rasio 3:4 dengan pemotongan otomatis.</p>
                         
                         <div class="row">
                             <!-- Preview Area -->
@@ -151,13 +151,13 @@ Profil Saya
                                        id="foto_profil" 
                                        accept="image/png, image/jpeg"
                                        aria-label="Upload foto profil">
-                                <div class="form-text">Format: JPG, PNG | Minimal 300x400 px | Maksimal 2MB</div>
+                                <div class="form-text">Format: JPG, PNG | Unggah foto apa saja, akan dicrop otomatis menjadi 3x4 | Maksimal 2MB</div>
                                 
                                 @error('foto_profil')
                                     <div class="invalid-feedback d-block">
                                         <i class="ri-error-warning-line"></i> {{ $message }}
                                     </div>
-                                @endif
+                                @enderror
 
                                 <!-- File Info Display -->
                                 <div id="foto-info" class="mt-3 p-2 bg-light rounded" style="display: none;">
@@ -170,8 +170,8 @@ Profil Saya
                                 </div>
 
                                 <!-- Validation Message -->
-                                <div id="aspect-ratio-warning" class="alert alert-warning d-none mt-3" role="alert">
-                                    <i class="ri-alert-line"></i> <strong>Peringatan:</strong> Foto tidak memiliki rasio 3:4. Foto akan dipotong otomatis untuk sesuai rasio yang benar.
+                                <div id="aspect-ratio-warning" class="alert alert-info d-none mt-3" role="alert">
+                                    <i class="ri-information-line"></i> Foto akan otomatis dicrop menjadi 3:4 saat ditampilkan.
                                 </div>
                             </div>
                         </div>

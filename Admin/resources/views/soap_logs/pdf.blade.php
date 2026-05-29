@@ -105,13 +105,12 @@
                 <tr>
                     <th>Diagnosis</th>
                     <td>
-    @if($log->diagnosis)
-        : {{ $log->diagnosis->diagnose_id }} - 
-          {{ $log->diagnosis->diagnose_name }}
-    @else
-        : {{ $log->diagnosa_id ?? 'Tidak ada' }}
-    @endif
-</td>
+                        @if($log->diagnosa_id)
+                            : {{ $log->diagnosa_id }} - {{ $diagnosisName ?? 'Tidak ditemukan' }}
+                        @else
+                            : Tidak ada
+                        @endif
+                    </td>
                 </tr>
             </table>
         </div>

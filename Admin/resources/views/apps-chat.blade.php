@@ -153,6 +153,7 @@
                                         </div>
 
                                         <div class="flex-1 overflow-hidden">
+           
                                             <h5 class="text-truncate font-size-14 mb-1">Mitchel Givens</h5>
                                             <p class="text-truncate mb-0">Hey! there I'm available</p>
                                         </div>

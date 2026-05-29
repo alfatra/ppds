@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\SoapLog;
 
 class Diagnosis extends Model
 {
@@ -22,4 +23,9 @@ class Diagnosis extends Model
     protected $casts = [
         'bp_js_reference_info' => 'json',
     ];
+
+    public function soapLogs()
+    {
+        return $this->hasMany(SoapLog::class, 'diagnosa_id', 'diagnose_id');
+    }
 }

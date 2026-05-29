@@ -73,7 +73,7 @@
 
                                                 @if (Route::has('password.request'))
                                                     <div class="mt-4 text-center">
-                                                        <a href="{{ route('password.request') }}" class="text-muted"><i
+                                                        <a href="javascript:void(0);" onclick="Swal.fire('Informasi', 'Silahkan menghubungi admin untuk melakukan reset password.', 'info')" class="text-muted"><i
                                                                 class="mdi mdi-lock me-1"></i> Forgot your password?</a>
                                                     </div>
                                                 @endif
@@ -109,15 +109,16 @@
 <!-- Sweet Alert-->
 <script src="{{ URL::asset('build/libs/sweetalert2/sweetalert2.min.js') }}"></script>
 
-@if(session('inactive_error'))
-<script>
-    // Sekarang library sudah dimuat, Swal akan terdefinisi
-    Swal.fire({
-        title: 'Gagal Login',
-        text: "{{ session('inactive_error') }}",
-        icon: 'warning',
-        confirmButtonColor: '#556ee6', // Warna tombol sesuai tema
-        confirmButtonText: 'Mengerti'
-    });
-</script>
+@if (session('sweet_alert'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const alertData = @json(session('sweet_alert'));
+            Swal.fire({
+                title: alertData.title,
+                text: alertData.text,
+                icon: alertData.icon,
+                confirmButtonText: 'Mengerti'
+            });
+        });
+    </script>
 @endif

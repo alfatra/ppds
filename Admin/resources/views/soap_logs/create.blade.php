@@ -9,9 +9,9 @@
             <h4 class="card-title mb-0">Create SOAP Entry</h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('ppds.soap-logs.store') }}" method="POST">
+            <form id="soap_log_form" action="{{ route('ppds.soap-logs.store') }}" method="POST" novalidate>
                 @include('soap_logs.form')
-                <button class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Save</button>
             </form>
         </div>
     </div>

@@ -15,13 +15,13 @@ class DiagnosaController extends Controller
      */
     public function getDiagnosaList()
     {
-        // Mengambil konfigurasi dari config/apis.php (cara yang benar di Laravel)
-        $apiUrl = config('apis.diagnosa.url');
-        $consumerId = config('apis.diagnosa.consumer_id');
-        $consumerPassword = config('apis.diagnosa.consumer_password');
+        // Mengambil konfigurasi dari config/apis.php dengan fallback ke .env
+        $apiUrl = config('apis.diagnosa.url') ?: env('API_DIAGNOSA_URL', 'http://192.168.10.33/medinfrasapi/rssm/api/diagnose/list'); // Sesuaikan default URL jika berbeda
+        $consumerId = config('apis.diagnosa.consumer_id') ?: env('API_CONSUMER_ID');
+        $consumerPassword = config('apis.diagnosa.consumer_password') ?: env('API_CONSUMER_PASSWORD');
 
-        if (!$consumerId || !$consumerPassword) {
-            Log::error('Kredensial API Diagnosa tidak ditemukan. Pastikan DIAGNOSA_CONSUMER_ID dan DIAGNOSA_CONSUMER_PASSWORD ada di file .env.');
+        if (!$consumerId || !$consumerPassword || !$apiUrl) {
+            Log::error('Kredensial atau URL API Diagnosa tidak ditemukan. Pastikan sudah diatur di file .env.');
             return response()->json(['success' => false, 'message' => 'Konfigurasi kredensial API di sisi server belum diatur.'], 500);
         }
 
@@ -42,25 +42,76 @@ class DiagnosaController extends Controller
                 'X-signature' => $signature
             ])->get($apiUrl);
 
-            if ($response->successful()) {
-                $dataArray = $response->json();
+         if ($response->successful()) {
 
-                // Data utama ada di dalam key 'Data' dan perlu di-decode lagi.
-                if (!isset($dataArray['Data'])) {
-                    Log::error('Proxy Gagal: Respons API Diagnosa tidak memiliki key "Data".', ['response' => $dataArray]);
-                    return response()->json(['success' => false, 'message' => 'Format respons dari server diagnosa tidak valid.'], 500);
-                }
+    $dataArray = $response->json();
 
-                $responseData = json_decode($dataArray['Data'], true);
+    Log::info('Diagnosa Raw Response', $dataArray);
 
-                $data = is_array($responseData) ? $responseData : [];
-                $filteredData = array_filter($data, fn($item) => $item !== null);
+    // Pastikan key Data ada
+    if (!isset($dataArray['Data'])) {
 
-                return response()->json([
-                    'success' => true,
-                    'data' => array_values($filteredData),
-                ]);
-            }
+        Log::error('Key Data tidak ditemukan', [
+            'response' => $dataArray
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Format response API tidak valid',
+            'response' => $dataArray
+        ], 200);
+    }
+
+    // Jika Data kosong/null
+    if (empty($dataArray['Data'])) {
+
+        return response()->json([
+            'success' => true,
+            'data' => [],
+            'count' => 0
+        ]);
+    }
+
+    // Decode JSON string dari API
+    $decodedData = json_decode($dataArray['Data'], true);
+
+    // CEK ERROR JSON
+    if (json_last_error() !== JSON_ERROR_NONE) {
+
+        Log::error('JSON Decode Error', [
+            'error' => json_last_error_msg(),
+            'raw_data' => substr($dataArray['Data'], 0, 1000)
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal membaca data diagnosa',
+            'json_error' => json_last_error_msg()
+        ], 200);
+    }
+
+    // Pastikan array
+    if (!is_array($decodedData)) {
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Format data diagnosa bukan array'
+        ], 200);
+    }
+
+    // Bersihkan null
+    $filteredData = array_filter($decodedData, function ($item) {
+        return $item !== null;
+    });
+
+    $finalData = array_values($filteredData);
+
+    return response()->json([
+        'success' => true,
+        'data' => $finalData,
+        'count' => count($finalData)
+    ]);
+}
 
             // Jika request gagal, catat error dan kembalikan pesan error ke frontend.
             Log::error('Proxy Gagal: API Diagnosa eksternal mengembalikan error.', [
@@ -68,9 +119,9 @@ class DiagnosaController extends Controller
                 'body' => $response->body()
             ]);
 
-            return response()->json(['success' => false, 'message' => 'Gagal mengambil data diagnosa dari server sumber. Status: ' . $response->status()], 500);
+            return response()->json(['success' => false, 'message' => 'Gagal mengambil data diagnosa dari server sumber. Status: ' . $response->status()], 200);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Menangani error koneksi (misal: API tidak bisa dijangkau)
             Log::error('Error koneksi ke API Diagnosa: ' . $e->getMessage());
 

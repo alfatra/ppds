@@ -81,9 +81,12 @@
                                                         class="form-control"
                                                         name="password_confirmation" required 
                                                         id="password-confirm" placeholder="Enter confirm password">
+                                                    @error('password_confirmation')
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong>{{ $message }}</strong>
+                                                        </span>
+                                                    @enderror
                                                 </div>
-
-
                                                 <div class="text-center">
                                                     <button class="btn btn-primary w-md waves-effect waves-light"
                                                         type="submit">Register</button>

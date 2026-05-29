@@ -22,15 +22,6 @@
         </div>
     </div>
 
-    {{-- Notifikasi untuk akun yang belum diaktifkan --}}
-    @if(!Auth::user()->is_active)
-        <div class="row mb-4">
-            <div class="col-12">
-                @include('components.inactive-account-card')
-            </div>
-        </div>
-    @endif
-
     {{-- Hero Metrics Section --}}
     <div class="row">
         {{-- Total SOAP Card --}}
@@ -157,7 +148,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-light border-0">
                     <h5 class="card-title mb-0">
-                        <i class="ri-list-check"></i> Top 5 Diagnosa
+                        <i class="ri-list-check"></i> Top Diagnosa
                     </h5>
                 </div>
                 <div class="card-body">
@@ -172,15 +163,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach(array_slice($diagnosisBreakdown['names'], 0, 5) as $index => $name)
+                                    @foreach($diagnosisBreakdown['names'] as $index => $name)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
-                                            <td>
-                                                <div>
-                                                    <span class="badge bg-primary">{{ $diagnosisBreakdown['codes'][$index] ?? '-' }}</span>
-                                                </div>
-                                                <small class="text-muted">{{ $name }}</small>
-                                            </td>
+                                            <td>{{ $name }}</td>
                                             <td class="text-end">{{ $diagnosisBreakdown['counts'][$index] ?? 0 }}</td>
                                         </tr>
                                     @endforeach
@@ -227,8 +213,6 @@
                 </div>
                 <div class="card-body">
                     @if ($recentSoaps->count() > 0)
-
-                    
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
                                 <thead class="table-light">
@@ -289,113 +273,65 @@
         </div>
     </div>
 
-</div> <!-- End container-fluid -->
+</div>
+
 @endsection
 
 @push('scripts')
-    <!-- Load ApexCharts CDN -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.umd.js"></script>
-    
     <script>
-        var apexRetries = 0;
-        function renderDashboardCharts() {
-            // Tunggu sampai library ApexCharts selesai dimuat dari CDN
-            if (typeof window.ApexCharts === 'undefined') {
-                apexRetries++;
-                if (apexRetries < 30) { // Coba maksimal 3 detik (30 x 100ms)
-                    setTimeout(renderDashboardCharts, 100);
-                } else {
-                    console.error("Gagal memuat ApexCharts. Pastikan koneksi internet stabil atau CDN tidak diblokir.");
-                }
+        function renderCharts() {
+            console.log('[Charts] Checking ApexCharts availability...');
+            
+            if (typeof ApexCharts === 'undefined') {
+                console.warn('[Charts] ApexCharts not ready yet, retrying in 200ms...');
+                setTimeout(renderCharts, 200);
                 return;
             }
 
-            // Weekly Trend Chart
-            var weeklyChartEl = document.querySelector("#weeklyTrendChart");
-            if (weeklyChartEl) {
-                weeklyChartEl.innerHTML = '';
-                var weeklyOptions = {
-                    series: [
-                        {
-                            name: 'Total SOAP',
-                            data: @json($weeklyData['counts'])
-                        },
-                        {
-                            name: 'User Aktif',
-                            data: @json($weeklyData['user_counts'])
-                        }
-                    ],
-                    chart: {
-                        type: 'line',
-                        height: 300,
-                        toolbar: {
-                            show: false
-                        },
-                        sparkline: {
-                            enabled: false
-                        }
-                    },
-                    colors: ['#5664d2', '#1cbb8c'],
-                    stroke: {
-                        width: 3,
-                        lineCap: 'round'
-                    },
-                    xaxis: {
-                        categories: @json($weeklyData['days']),
-                        axisBorder: {
-                            show: false
-                        },
-                        axisTicks: {
-                            show: false
-                        }
-                    },
-                    yaxis: {
-                        min: 0
-                    },
-                    grid: {
-                        borderColor: '#f1f5f7',
-                        padding: {
-                            bottom: 0
-                        }
-                    },
-                    legend: {
-                        show: true,
-                        position: 'top'
-                    },
-                    fill: {
-                        type: 'gradient',
-                        gradient: {
-                            shadeIntensity: 1,
-                            opacityFrom: 0.45,
-                            opacityTo: 0.05,
-                            stops: [20, 100, 100, 100]
-                        }
-                    }
-                };
-            var weeklyChart = new window.ApexCharts(weeklyChartEl, weeklyOptions);
-                weeklyChart.render();
-            }
+            console.log('[Charts] ApexCharts ready, rendering...');
 
-            // Doctor Activity Chart
-            @if ($isAdmin && count($doctorActivity) > 0)
-                var doctorChartEl = document.querySelector("#doctorActivityChart");
-                if (doctorChartEl) {
-                    doctorChartEl.innerHTML = '';
-                    var doctorOptions = {
+            try {
+                // Sidebar toggle button
+                var btn = document.getElementById('vertical-menu-btn');
+                if (btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var body = document.body;
+                        body.classList.toggle('sidebar-enable');
+                        if (window.innerWidth >= 992) {
+                            body.classList.toggle('vertical-collpsed');
+                        } else {
+                            body.classList.remove('vertical-collpsed');
+                        }
+                    }, true);
+                }
+
+                // Weekly Trend Chart
+                try {
+                    var weeklyOptions = {
                         series: [{
                             name: 'SOAP Entries',
-                            data: @json(array_column($doctorActivity, 'count'))
+                            data: @json($weeklyData['counts'])
                         }],
                         chart: {
-                            type: 'bar',
-                            height: 350,
+                            type: 'line',
+                            height: 300,
                             toolbar: {
                                 show: false
+                            },
+                            sparkline: {
+                                enabled: false
                             }
                         },
-                        colors: ['#1cbb8c'],
+                        colors: ['#5664d2'],
+                        stroke: {
+                            width: 3,
+                            lineCap: 'round'
+                        },
                         xaxis: {
-                            categories: @json(array_column($doctorActivity, 'name')),
+                            categories: @json($weeklyData['days']),
                             axisBorder: {
                                 show: false
                             },
@@ -407,38 +343,96 @@
                             min: 0
                         },
                         grid: {
-                            borderColor: '#f1f5f7'
+                            borderColor: '#f1f5f7',
+                            padding: {
+                                bottom: 0
+                            }
                         },
                         legend: {
                             show: false
                         },
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 5,
-                                dataLabels: {
-                                    position: 'top'
-                                }
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shadeIntensity: 1,
+                                opacityFrom: 0.45,
+                                opacityTo: 0.05,
+                                stops: [20, 100, 100, 100]
                             }
                         }
                     };
-            var doctorChart = new window.ApexCharts(doctorChartEl, doctorOptions);
-                    doctorChart.render();
+
+                    var weeklyChart = new ApexCharts(document.querySelector("#weeklyTrendChart"), weeklyOptions);
+                    weeklyChart.render();
+                    console.log('[Charts] Weekly trend chart rendered');
+                } catch (e) {
+                    console.error('[Charts] Error rendering weekly chart:', e.message);
                 }
-            @endif
-        }
 
-        // Trigger render saat halaman di-load
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', renderDashboardCharts);
-        } else {
-            renderDashboardCharts();
-        }
+                // Diagnosis section is now rendered as a table, no chart needed
 
-        // Trigger render saat menekan tombol "Back" (Restored dari cache browser / bfcache)
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                renderDashboardCharts();
+                // Doctor Activity Chart
+                @if ($isAdmin && count($doctorActivity) > 0)
+                    try {
+                        var doctorOptions = {
+                            series: [{
+                                name: 'SOAP Entries',
+                                data: @json(array_column($doctorActivity, 'count'))
+                            }],
+                            chart: {
+                                type: 'bar',
+                                height: 350,
+                                toolbar: {
+                                    show: false
+                                }
+                            },
+                            colors: ['#1cbb8c'],
+                            xaxis: {
+                                categories: @json(array_column($doctorActivity, 'name')),
+                                axisBorder: {
+                                    show: false
+                                },
+                                axisTicks: {
+                                    show: false
+                                }
+                            },
+                            yaxis: {
+                                min: 0
+                            },
+                            grid: {
+                                borderColor: '#f1f5f7'
+                            },
+                            legend: {
+                                show: false
+                            },
+                            plotOptions: {
+                                bar: {
+                                    borderRadius: 5,
+                                    dataLabels: {
+                                        position: 'top'
+                                    }
+                                }
+                            }
+                        };
+
+                        var doctorChart = new ApexCharts(document.querySelector("#doctorActivityChart"), doctorOptions);
+                        doctorChart.render();
+                        console.log('[Charts] Doctor activity chart rendered');
+                    } catch (e) {
+                        console.error('[Charts] Error rendering doctor chart:', e.message);
+                    }
+                @endif
+
+            } catch (e) {
+                console.error('[Charts] Unexpected error:', e.message);
             }
-        });
+        }
+
+        // Start rendering when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderCharts);
+        } else {
+            renderCharts();
+        }
     </script>
 @endpush

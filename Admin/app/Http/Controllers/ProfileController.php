@@ -34,7 +34,7 @@ class ProfileController extends Controller
             'agama'        => 'nullable|string|max:50',
             'alamat'       => 'nullable|string',
             'berkas'       => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:5120',
-            'foto_profil'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048|dimensions:ratio=3/4',
+            'foto_profil'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         // 1. Update nama di tabel Users

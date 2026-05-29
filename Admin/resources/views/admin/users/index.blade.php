@@ -68,6 +68,13 @@
                                             </form>
                                         </td>
                                         <td>
+                                            <button type="button" class="btn btn-sm btn-warning" onclick="showResetPasswordConfirmation({{ $user->id }})">
+                                                <i class="mdi mdi-lock-reset"></i> Reset
+                                            </button>
+                                            <form id="reset-password-form-{{ $user->id }}" action="{{ route('admin.users.resetPassword', $user->id) }}" method="POST" style="display: none;">
+                                                @csrf
+                                                @method('PATCH')
+                                            </form>
                                             <button type="button" class="btn btn-sm btn-danger" onclick="showDeleteConfirmation({{ $user->id }})">
                                                 <i class="mdi mdi-trash-can"></i>
                                             </button>
@@ -95,6 +102,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        function showResetPasswordConfirmation(id) {
+            Swal.fire({
+                title: 'Reset Password Pengguna?',
+                text: "Password akan di-reset menjadi 123456. Pastikan pengguna sudah diberitahu!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, reset password!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('reset-password-form-' + id).submit();
+                }
+            })
+        }
+
         function showDeleteConfirmation(id) {
             Swal.fire({
                 title: 'Yakin ingin menghapus akun ini?',

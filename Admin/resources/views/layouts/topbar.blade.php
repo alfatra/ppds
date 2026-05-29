@@ -183,33 +183,70 @@
             </div>
 
             <div class="dropdown d-inline-block user-dropdown">
-                <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
+                <button type="button" class="btn header-item waves-effect profile-trigger" id="page-header-user-dropdown"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img class="rounded-circle header-profile-user" src="{{ Auth::user()->getProfilePhotoUrl() }}"
                         alt="Header Avatar">
-                    <span class="d-none d-xl-inline-block ms-1">{{ Auth::user()->name }}</span>
+                    <span class="d-none d-xl-inline-block ms-1">
+                        {{ Auth::user()->name }}
+                        @if(!Auth::user()->is_active)
+                            <span class="badge bg-warning text-dark ms-1" title="Akun pending aktivasi">
+                                <i class="ri-time-line"></i> Pending
+                            </span>
+                        @else
+                            <span class="badge bg-success ms-1" title="Akun aktif">
+                                <i class="ri-check-line"></i> Aktif
+                            </span>
+                        @endif
+                    </span>
                     <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                 </button>
-                <div class="dropdown-menu dropdown-menu-end">
-                    <!-- item-->
-                  <!-- Ubah href yang awalnya mungkin "#" atau "/" menjadi route profile -->
-                    <a href="{{ route('profile.edit') }}" class="dropdown-item">
-                        <i class="ri-user-line align-middle me-1"></i> Profil</a>
-                    <a class="dropdown-item" href="#"><i class="ri-wallet-2-line align-middle me-1"></i> My Wallet</a>
-                    <a class="dropdown-item d-block" href="#"><span class="badge bg-success float-end mt-1">11</span><i class="ri-settings-2-line align-middle me-1"></i> Settings</a>
-                    <a class="dropdown-item" href="#"><i class="ri-lock-unlock-line align-middle me-1"></i> Lock screen</a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-profile">
+                    <div class="profile-dropdown-header p-3 text-white">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ Auth::user()->getProfilePhotoUrl() }}" class="rounded-circle avatar-sm border border-white me-2"
+                                alt="{{ Auth::user()->name }}">
+                            <div>
+                                <h6 class="mb-1">{{ Auth::user()->name }}</h6>
+                                <p class="mb-0 text-white-75">{{ Auth::user()->email }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-between align-items-center">
+                            <span class="badge bg-light text-dark">{{ Auth::user()->is_active ? 'Akun Aktif' : 'Pending' }}</span>
+                            <small class="text-white-75">Dashboard pribadi</small>
+                        </div>
+                    </div>
+                    <a href="{{ route('profile.edit') }}" class="dropdown-item d-flex align-items-center">
+                        <i class="ri-user-line align-middle me-2"></i>
+                        <span>Edit Profil</span>
+                        <span class="badge bg-primary ms-auto">Baru</span>
+                    </a>
+                    <a href="javascript:void(0);" class="dropdown-item d-flex align-items-center">
+                        <i class="ri-shopping-basket-2-line align-middle me-2"></i>
+                        <span>My Wallet</span>
+                        <span class="badge bg-success ms-auto">11</span>
+                    </a>
+                    <a href="javascript:void(0);" class="dropdown-item d-flex align-items-center">
+                        <i class="ri-settings-2-line align-middle me-2"></i>
+                        <span>Pengaturan</span>
+                    </a>
+                    <a href="javascript:void(0);" class="dropdown-item d-flex align-items-center">
+                        <i class="ri-lock-unlock-line align-middle me-2"></i>
+                        <span>Layar Terkunci</span>
+                    </a>
                     <div class="dropdown-divider"></div>
-                    
-                    <!-- Logout Form -->
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="ps-0 pe-0">
-                        @csrf
-                        <button type="submit" class="dropdown-item text-danger w-100 text-start" style="border: none; background: none; cursor: pointer;">
-                            <i class="ri-shut-down-line align-middle me-1 text-danger"></i> Logout
-                        </button>
-                    </
-                    form>
+                    <button type="button" class="dropdown-item text-danger w-100 text-start logout-action" id="btn-logout"
+                        onclick="handleLogout(event)">
+                        <i class="ri-shut-down-line align-middle me-2"></i>
+                        <span>Logout</span>
+                    </button>
                 </div>
             </div>
+
+            <!-- Hidden Logout Form -->
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                @csrf
+            </form>
 
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect">
@@ -220,3 +257,78 @@
         </div>
     </div>
 </header>
+
+<style>
+    .profile-trigger {
+        border-radius: 50px;
+        padding: 0.55rem 0.85rem;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .profile-trigger:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-profile-user {
+        object-fit: cover;
+    }
+
+    .dropdown-menu-profile {
+        min-width: 300px;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+        border: 0;
+    }
+
+    .profile-dropdown-header {
+        background: linear-gradient(135deg, rgba(91, 33, 182, 0.95), rgba(103, 58, 183, 0.92));
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .profile-dropdown-header .avatar-sm {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+    }
+
+    .dropdown-menu-profile .dropdown-item {
+        padding: 0.85rem 1.2rem;
+        color: #4b4f58;
+        transition: background-color .2s ease, transform .2s ease;
+    }
+
+    .dropdown-menu-profile .dropdown-item:hover,
+    .dropdown-menu-profile .dropdown-item.logout-action:hover {
+        background-color: rgba(103, 58, 183, 0.08);
+        transform: translateX(4px);
+    }
+
+    .dropdown-menu-profile .dropdown-divider {
+        margin: 0.5rem 0;
+        border-top-color: rgba(17, 24, 39, 0.08);
+    }
+
+    .dropdown-menu-profile .badge {
+        font-size: 0.65rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        padding: 0.4em 0.55em;
+    }
+
+    .profile-dropdown-header h6 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 0.125rem;
+    }
+
+    .profile-dropdown-header p {
+        font-size: 0.78rem;
+        opacity: 0.92;
+    }
+
+    .profile-dropdown-header small {
+        font-size: 0.75rem;
+    }
+</style>

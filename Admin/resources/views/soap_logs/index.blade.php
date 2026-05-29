@@ -11,6 +11,20 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
     <p><a href="{{ route('ppds.soap-logs.create') }}" class="btn btn-primary btn-sm">New Entry</a></p>
+   <div class="d-flex justify-content-end mb-3">
+    <!-- max-width membatasi lebar form agar tidak memanjang -->
+    <form action="{{ route('ppds.soap-logs.index') }}" method="GET" style="max-width: 300px; width: 100%;">
+        <!-- input-group-sm membuat ukuran input dan tombol menjadi lebih kecil -->
+        <div class="input-group input-group-sm">
+            <input type="text" name="search" class="form-control" placeholder="Cari laporan..." value="{{ request('search') }}">
+            <button class="btn btn-primary" type="submit">Cari</button>
+            @if(request('search'))
+                <a href="{{ route('ppds.soap-logs.index') }}" class="btn btn-secondary" title="Reset">X</a>
+            @endif
+        </div>
+    </form>
+</div>
+
     <div class="table-responsive">
     <table class="table table-bordered align-middle">
         <thead class="table-light">
@@ -32,8 +46,9 @@
                     <td>  {{ $log->visit_date->format('d F Y, H:i') }}</td>
                     <td>{{ Str::limit($log->subjective,50) }}</td>
                     <td>
-                    @if($log->diagnosis)
-                        {{ $log->diagnosis->diagnose_id }} - {{ $log->diagnosis->diagnose_name }}
+                    @if($log->diagnosa_id)
+                        <span class="badge bg-primary">{{ $log->diagnosa_id }}</span><br>
+                        <small class="text-muted">{{ $log->api_diagnosis_name ?? '-' }}</small>
                     @else
                         -
                     @endif

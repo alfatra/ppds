@@ -21,11 +21,19 @@ class DiagnosisController extends Controller
             });
         }
 
-        $diagnoses = Diagnosis::limit(20000)->get();
+        // Reduce payload and use the built query. If a search query is present,
+        // return a reasonably sized result set for autocomplete (max 200).
+        // Otherwise return a paginated/small listing (max 50) to avoid huge responses.
+        $limit = !empty($q) ? 200 : 50;
+
+        $diagnoses = $query->select('diagnose_id', 'diagnose_name')
+            ->limit($limit)
+            ->get();
 
         return response()->json([
             'success' => true,
-            'data' => $diagnoses
+            'data' => $diagnoses,
+            'count' => $diagnoses->count()
         ]);
     }
 }
