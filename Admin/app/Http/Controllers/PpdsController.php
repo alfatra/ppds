@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage; // Import Storage facade
 use App\Models\Ppds; // Import model Ppds
+use App\Models\User;
 
 class PpdsController extends Controller
 {
@@ -86,7 +87,15 @@ public function update(Request $request, Ppds $ppds)
         $validatedData['path_berkas'] = $path;
     }
 
+    $oldEmail = $ppds->email;
     $ppds->update($validatedData);
+
+    if (isset($validatedData['email']) && $validatedData['email'] !== $oldEmail) {
+        $user = User::where('email', $oldEmail)->first();
+        if ($user && !User::where('email', $validatedData['email'])->where('id', '!=', $user->id)->exists()) {
+            $user->update(['email' => $validatedData['email']]);
+        }
+    }
 
     return redirect()->route('ppds.index')->with('success', 'Data PPDS berhasil diperbarui!');
 }

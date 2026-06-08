@@ -213,26 +213,21 @@
                         </div>
                         <div class="mt-3 d-flex justify-content-between align-items-center">
                             <span class="badge bg-light text-dark">{{ Auth::user()->is_active ? 'Akun Aktif' : 'Pending' }}</span>
-                            <small class="text-white-75">Dashboard pribadi</small>
+                            <small class="text-white-75">
+                                @if(Auth::user()->isSuperAdmin())
+                                    Superadmin
+                                @elseif(Auth::user()->isAdmin())
+                                    Admin
+                                @else
+                                    User
+                                @endif
+                            </small>
                         </div>
                     </div>
                     <a href="{{ route('profile.edit') }}" class="dropdown-item d-flex align-items-center">
                         <i class="ri-user-line align-middle me-2"></i>
                         <span>Edit Profil</span>
                         <span class="badge bg-primary ms-auto">Baru</span>
-                    </a>
-                    <a href="javascript:void(0);" class="dropdown-item d-flex align-items-center">
-                        <i class="ri-shopping-basket-2-line align-middle me-2"></i>
-                        <span>My Wallet</span>
-                        <span class="badge bg-success ms-auto">11</span>
-                    </a>
-                    <a href="javascript:void(0);" class="dropdown-item d-flex align-items-center">
-                        <i class="ri-settings-2-line align-middle me-2"></i>
-                        <span>Pengaturan</span>
-                    </a>
-                    <a href="javascript:void(0);" class="dropdown-item d-flex align-items-center">
-                        <i class="ri-lock-unlock-line align-middle me-2"></i>
-                        <span>Layar Terkunci</span>
                     </a>
                     <div class="dropdown-divider"></div>
                     <button type="button" class="dropdown-item text-danger w-100 text-start logout-action" id="btn-logout"

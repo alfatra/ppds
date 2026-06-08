@@ -475,16 +475,7 @@
 
                                 <a href="calendar" class="dropdown-item">Calendar</a>
                                 <a href="apps-chat" class="dropdown-item">Chat</a>
-                                <div class="dropdown">
-                                    <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-email"
-                                        role="button">
-                                        Email <div class="arrow-down"></div>
-                                    </a>
-                                    <div class="dropdown-menu" aria-labelledby="topnav-email">
-                                        <a href="email-inbox" class="dropdown-item">Inbox</a>
-                                        <a href="email-read" class="dropdown-item">Read Email</a>
-                                    </div>
-                                </div>
+                                {{-- Email dropdown removed --}}
                                 <div class="dropdown">
                                     <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-ecommerce"
                                         role="button">

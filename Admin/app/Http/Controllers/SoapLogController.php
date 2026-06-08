@@ -35,10 +35,14 @@ class SoapLogController extends Controller
                   ->orWhere('objective', 'like', '%' . $search . '%')
                   ->orWhere('assessment', 'like', '%' . $search . '%')
                   ->orWhere('plan', 'like', '%' . $search . '%')
-                  // Menambahkan pencarian berdasarkan nama pasien di tabel relasi 'patients'
                   ->orWhereHas('patient', function ($patientQuery) use ($search) {
-                      // PENTING: Ganti 'patient_name' di bawah ini dengan nama kolom yang benar di tabel pasien Anda
                       $patientQuery->where('name', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('doctor', function ($doctorQuery) use ($search) {
+                      $doctorQuery->where('name', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('creator', function ($creatorQuery) use ($search) {
+                      $creatorQuery->where('name', 'like', '%' . $search . '%');
                   });
             });
         }

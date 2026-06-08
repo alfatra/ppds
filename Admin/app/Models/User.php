@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'attendance_target',
     ];
 
     const ROLE_SUPERADMIN = 'superadmin';
@@ -48,6 +49,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
         'password' => 'hashed',
+        'attendance_target' => 'integer',
     ];
 
     /**

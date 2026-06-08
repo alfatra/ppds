@@ -35,6 +35,7 @@
                                     <th>Email</th>
                                     <th>Role</th>
                                     <th>Status</th>
+                                    <th>Target Check-In</th>
                                     <th style="width: 100px;">Aksi</th>
                                 </tr>
                             </thead>
@@ -66,6 +67,16 @@
                                                     <button type="submit" class="btn btn-sm btn-danger">Tidak Aktif</button>
                                                 @endif
                                             </form>
+                                        </td>
+                                        <td style="width: 220px;">
+                                            @if(in_array(Auth::user()->role, ['admin','superadmin']))
+                                                <form action="{{ route('admin.users.updateAttendance', $user->id) }}" method="POST" class="d-inline d-flex gap-2 align-items-center">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="number" name="attendance_target" min="0" class="form-control form-control-sm" style="width:100px;" value="{{ $user->attendance_target ?? '' }}" placeholder="Target hari">
+                                                    <button type="submit" class="btn btn-sm btn-primary">Set</button>
+                                                </form>
+                                            @endif
                                         </td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-warning" onclick="showResetPasswordConfirmation({{ $user->id }})">

@@ -13,10 +13,10 @@
     <p><a href="{{ route('ppds.soap-logs.create') }}" class="btn btn-primary btn-sm">New Entry</a></p>
    <div class="d-flex justify-content-end mb-3">
     <!-- max-width membatasi lebar form agar tidak memanjang -->
-    <form action="{{ route('ppds.soap-logs.index') }}" method="GET" style="max-width: 300px; width: 100%;">
+    <form action="{{ route('ppds.soap-logs.index') }}" method="GET" style="max-width: 320px; width: 100%;">
         <!-- input-group-sm membuat ukuran input dan tombol menjadi lebih kecil -->
         <div class="input-group input-group-sm">
-            <input type="text" name="search" class="form-control" placeholder="Cari laporan..." value="{{ request('search') }}">
+            <input type="text" name="search" class="form-control" placeholder="Cari dokter, pasien, atau diinput oleh..." value="{{ request('search') }}">
             <button class="btn btn-primary" type="submit">Cari</button>
             @if(request('search'))
                 <a href="{{ route('ppds.soap-logs.index') }}" class="btn btn-secondary" title="Reset">X</a>

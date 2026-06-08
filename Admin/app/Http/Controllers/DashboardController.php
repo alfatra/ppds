@@ -7,6 +7,9 @@ use App\Models\Diagnosis;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -82,7 +85,7 @@ class DashboardController extends Controller
     private function getDiagnosisBreakdown($baseQuery)
     {
         $diagnosisCounts = (clone $baseQuery)
-            ->selectRaw('COALESCE(diagnoses.diagnose_name, soap_logs.diagnosa_id) AS name, COUNT(*) AS count')
+            ->selectRaw('soap_logs.diagnosa_id AS code, COALESCE(NULLIF(diagnoses.diagnose_name, \'\'), soap_logs.diagnosa_id) AS name, COUNT(*) AS count')
             ->leftJoin('diagnoses', 'soap_logs.diagnosa_id', '=', 'diagnoses.diagnose_id')
             ->whereNotNull('soap_logs.diagnosa_id')
             ->where('soap_logs.diagnosa_id', '<>', '')
@@ -91,22 +94,86 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $diagnosisMap = $this->getDiagnosisMapFromApi();
+
+        $codes = [];
+        $names = [];
+        $counts = [];
+
+        foreach ($diagnosisCounts as $item) {
+            $codes[] = $item->code;
+            $diagnosisName = $item->name ?: $item->code;
+
+            if ($diagnosisName === $item->code) {
+                $diagData = $diagnosisMap->get($item->code);
+                if ($diagData) {
+                    $diagnosisName = data_get($diagData, 'DiagnoseName')
+                        ?: data_get($diagData, 'diagnose_name')
+                        ?: data_get($diagData, 'name')
+                        ?: data_get($diagData, 'DiagnoseDesc')
+                        ?: $item->code;
+                }
+            }
+
+            $names[] = $diagnosisName;
+            $counts[] = $item->count;
+        }
+
         \Log::debug('[Dashboard] Diagnosis Breakdown', [
-            'count' => $diagnosisCounts->count(),
-            'data' => $diagnosisCounts->toArray()
+            'count' => count($codes),
+            'codes' => $codes,
+            'names' => $names,
         ]);
 
         return [
-            'names' => $diagnosisCounts->pluck('name')->toArray(),
-            'counts' => $diagnosisCounts->pluck('count')->toArray(),
+            'codes' => $codes,
+            'names' => $names,
+            'counts' => $counts,
         ];
+    }
+
+    private function getDiagnosisMapFromApi()
+    {
+        return Cache::remember('diagnosis_full_map', now()->addHours(24), function () {
+            $apiUrl = config('apis.diagnosa.url') ?: env('API_DIAGNOSA_URL', 'http://192.168.10.33/medinfrasapi/rssm/api/diagnose/list');
+            $consumerId = config('apis.diagnosa.consumer_id') ?: env('API_CONSUMER_ID');
+            $consumerPassword = config('apis.diagnosa.consumer_password') ?: env('API_CONSUMER_PASSWORD');
+
+            if (!$consumerId || !$consumerPassword) {
+                Log::error('Kredensial API Diagnosa tidak ditemukan untuk mapping.');
+                return collect();
+            }
+
+            try {
+                $timestamp = time();
+                $dataToSign = $timestamp . $consumerId;
+                $signature = base64_encode(hash_hmac('sha256', $dataToSign, $consumerPassword, true));
+
+                $response = Http::timeout(30)->withHeaders([
+                    'X-cons-id' => $consumerId,
+                    'X-timestamp' => $timestamp,
+                    'X-signature' => $signature
+                ])->get($apiUrl);
+
+                $responseData = $response->json();
+                if ($response->successful() && isset($responseData['Data'])) {
+                    $dataField = $responseData['Data'];
+                    $diagnoses = is_string($dataField) ? json_decode($dataField, true) : $dataField;
+                    return collect($diagnoses ?? [])->keyBy('DiagnoseID');
+                }
+                return collect();
+            } catch (\Exception $e) {
+                Log::error('Error koneksi ke API Diagnosa saat mapping data: ' . $e->getMessage());
+                return collect();
+            }
+        });
     }
 
     private function getDoctorActivity()
     {
         $doctors = User::where('role', 'user')
             ->withCount(['soapLogs' => function ($q) {
-                $q->whereMonth('created_at', now()->month);
+                $q->where('created_at', '>=', now()->subDays(6)->startOfDay());
             }])
             ->orderByDesc('soap_logs_count')
             ->limit(5)

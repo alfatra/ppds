@@ -101,15 +101,16 @@ class HomeController extends Controller
     private function getDiagnosisBreakdown($baseQuery)
     {
         $diagnosisCounts = (clone $baseQuery)
-            ->selectRaw('soap_logs.diagnosa_id, COUNT(*) AS count')
+            ->selectRaw('soap_logs.diagnosa_id, COALESCE(NULLIF(diagnoses.diagnose_name, \'\'), soap_logs.diagnosa_id) AS diagnosis_name, COUNT(*) AS count')
+            ->leftJoin('diagnoses', 'soap_logs.diagnosa_id', '=', 'diagnoses.diagnose_id')
             ->whereNotNull('soap_logs.diagnosa_id')
             ->where('soap_logs.diagnosa_id', '<>', '')
-            ->groupBy('soap_logs.diagnosa_id')
+            ->groupBy('soap_logs.diagnosa_id', 'diagnoses.diagnose_name')
             ->orderByRaw('COUNT(*) DESC')
             ->limit(5)
             ->get();
 
-        // Ambil diagnosis data dari API
+        // Ambil diagnosis data dari API sebagai fallback jika nama belum ada di tabel lokal
         $diagnosisMap = $this->getDiagnosisMapFromApi();
 
         $codes = [];
@@ -118,8 +119,20 @@ class HomeController extends Controller
 
         foreach ($diagnosisCounts as $item) {
             $codes[] = $item->diagnosa_id;
-            $diagData = $diagnosisMap->get($item->diagnosa_id);
-            $names[] = $diagData ? $diagData['DiagnoseName'] : $item->diagnosa_id;
+            $diagnosisName = $item->diagnosis_name ?: $item->diagnosa_id;
+
+            if ($diagnosisName === $item->diagnosa_id) {
+                $diagData = $diagnosisMap->get($item->diagnosa_id);
+                if ($diagData) {
+                    $diagnosisName = data_get($diagData, 'DiagnoseName')
+                        ?: data_get($diagData, 'diagnose_name')
+                        ?: data_get($diagData, 'name')
+                        ?: data_get($diagData, 'DiagnoseDesc')
+                        ?: $item->diagnosa_id;
+                }
+            }
+
+            $names[] = $diagnosisName;
             $counts[] = $item->count;
         }
 

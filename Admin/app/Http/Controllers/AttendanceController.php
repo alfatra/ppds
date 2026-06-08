@@ -111,14 +111,17 @@ class AttendanceController extends Controller
 
         foreach ($attendanceData as $attendance) {
             $user = $attendance['user'];
-            $presentDays = count(array_filter($attendance['days'], fn($day) => $day['is_present']));
             $totalDays = count($attendance['days']);
+            $presentDays = count(array_filter($attendance['days'], fn($day) => $day['is_present']));
+            $targetDays = isset($user->attendance_target) && $user->attendance_target !== null ? (int) $user->attendance_target : null;
 
             $statistics[$user->id] = [
                 'name' => $user->name,
                 'present' => $presentDays,
                 'absent' => $totalDays - $presentDays,
                 'total' => $totalDays,
+                'target' => $targetDays,
+                'target_met' => $targetDays !== null ? $presentDays >= $targetDays : null,
                 'percentage' => $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 2) : 0
             ];
         }

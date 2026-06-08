@@ -49,6 +49,8 @@
                                     <th class="text-center">Present Days</th>
                                     <th class="text-center">Absent Days</th>
                                     <th class="text-center">Total Days</th>
+                                    <th class="text-center">Target Days</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center">Attendance %</th>
                                 </tr>
                             </thead>
@@ -63,6 +65,22 @@
                                         <span class="badge bg-danger">{{ $stat['absent'] }}</span>
                                     </td>
                                     <td class="text-center">{{ $stat['total'] }}</td>
+                                    <td class="text-center">
+                                        @if($stat['target'] !== null)
+                                            {{ $stat['target'] }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @if($stat['target'] === null)
+                                            <span class="badge bg-secondary">No Target</span>
+                                        @elseif($stat['target_met'])
+                                            <span class="badge bg-success">Target Met</span>
+                                        @else
+                                            <span class="badge bg-warning">Needs {{ max(0, $stat['target'] - $stat['present']) }} more</span>
+                                        @endif
+                                    </td>
                                     <td class="text-center">
                                         @if($stat['percentage'] >= 80)
                                             <span class="badge bg-success">{{ $stat['percentage'] }}%</span>

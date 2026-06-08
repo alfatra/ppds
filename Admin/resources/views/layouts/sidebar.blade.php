@@ -70,16 +70,7 @@
                     </a>
                 </li>
                 
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="ri-mail-send-line"></i>
-                        <span>Email</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="email-inbox">Inbox</a></li>
-                        <li><a href="email-read">Read Email</a></li>
-                    </ul>
-                </li>
+                {{-- Email menu removed per request --}}
 
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -144,96 +135,6 @@
                     </ul>
                 </li>
 
-                <li class="menu-title">Components</li>
-
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="ri-pencil-ruler-2-line"></i>
-                        <span>UI Elements</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="ui-alerts">Alerts</a></li>
-                        <li><a href="ui-buttons">Buttons</a></li>
-                        <li><a href="ui-cards">Cards</a></li>
-                        <li><a href="ui-carousel">Carousel</a></li>
-                        <li><a href="ui-dropdowns">Dropdowns</a></li>
-                        <li><a href="ui-grid">Grid</a></li>
-                        <li><a href="ui-images">Images</a></li>
-                        <li><a href="ui-lightbox">Lightbox</a></li>
-                        <li><a href="ui-modals">Modals</a></li>
-                        <li><a href="ui-offcanvas">Offcavas</a></li>
-                        <li><a href="ui-rangeslider">Range Slider</a></li>
-                        <li><a href="ui-roundslider">Round Slider</a></li>
-                        <li><a href="ui-session-timeout">Session Timeout</a></li>
-                        <li><a href="ui-progressbars">Progress Bars</a></li>
-                        <li><a href="ui-sweet-alert">Sweetalert 2</a></li>
-                        <li><a href="ui-tabs-accordions">Tabs & Accordions</a></li>
-                        <li><a href="ui-typography">Typography</a></li>
-                        <li><a href="ui-video">Video</a></li>
-                        <li><a href="ui-general">General</a></li>
-                        <li><a href="ui-rating">Rating</a></li>
-                        <li><a href="ui-notifications">Notifications</a></li>
-                    </ul>
-                </li>
-
-                <li>
-                    <a href="javascript: void(0);" class="waves-effect">
-                        <i class="ri-eraser-fill"></i>
-                        <span class="badge rounded-pill bg-danger float-end">8</span>
-                        <span>Forms</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="form-elements">Form Elements</a></li>
-                        <li><a href="form-validation">Form Validation</a></li>
-                        <li><a href="form-advanced">Form Advanced Plugins</a></li>
-                        <li><a href="form-editors">Form Editors</a></li>
-                        <li><a href="form-uploads">Form File Upload</a></li>
-                        <li><a href="form-xeditable">Form X-editable</a></li>
-                        <li><a href="form-wizard">Form Wizard</a></li>
-                        <li><a href="form-mask">Form Mask</a></li>
-                    </ul>
-                </li>
-
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="ri-table-2"></i>
-                        <span>Tables</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="tables-basic">Basic Tables</a></li>
-                        <li><a href="tables-datatable">Data Tables</a></li>
-                        <li><a href="tables-responsive">Responsive Table</a></li>
-                        <li><a href="tables-editable">Editable Table</a></li>
-                    </ul>
-                </li>
-
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="ri-bar-chart-line"></i>
-                        <span>Charts</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="charts-apex">Apex Charts</a></li>
-                        <li><a href="charts-chartjs">Chartjs Charts</a></li>
-                        <li><a href="charts-flot">Flot Charts</a></li>
-                        <li><a href="charts-knob">Jquery Knob Charts</a></li>
-                        <li><a href="charts-sparkline">Sparkline Charts</a></li>
-                    </ul>
-                </li>
-
-                <li>
-                    <a href="javascript: void(0);" class="has-arrow waves-effect">
-                        <i class="ri-brush-line"></i>
-                        <span>Icons</span>
-                    </a>
-                    <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="icons-remix">Remix Icons</a></li>
-                        <li><a href="icons-materialdesign">Material Design</a></li>
-                        <li><a href="icons-dripicons">Dripicons</a></li>
-                        <li><a href="icons-fontawesome">Font awesome 5</a></li>
-                    </ul>
-                </li>
-                
             </ul>
         </div>
         <!-- Sidebar -->

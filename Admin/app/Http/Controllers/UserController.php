@@ -101,6 +101,26 @@ class UserController extends Controller
     }
 
     /**
+     * Update required attendance days for a user (admin/superadmin only).
+     */
+    public function updateAttendance(Request $request, User $user)
+    {
+        $request->validate([
+            'attendance_target' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        // Prevent admins from changing superadmin values
+        if ($user->isSuperAdmin() && Auth::user()->isAdmin()) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk mengubah data Super Admin.');
+        }
+
+        $user->attendance_target = $request->attendance_target;
+        $user->save();
+
+        return back()->with('success', 'Target hari check-in pengguna berhasil diperbarui.');
+    }
+
+    /**
      * Remove the specified user from storage.
      *
      * @param  \App\Models\User  $user

@@ -179,7 +179,9 @@
                                                 <div>
                                                     <span class="badge bg-primary">{{ $diagnosisBreakdown['codes'][$index] ?? '-' }}</span>
                                                 </div>
-                                                <small class="text-muted">{{ $name }}</small>
+                                                <div class="mt-1">
+                                                    <strong>{{ $name ?: ($diagnosisBreakdown['codes'][$index] ?? '-') }}</strong>
+                                                </div>
                                             </td>
                                             <td class="text-end">{{ $diagnosisBreakdown['counts'][$index] ?? 0 }}</td>
                                         </tr>
@@ -293,9 +295,9 @@
 @endsection
 
 @push('scripts')
-    <!-- Load ApexCharts CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.umd.js"></script>
-    
+    <!-- Load ApexCharts from unpkg CDN -->
+    <script src="https://unpkg.com/apexcharts@latest/dist/apexcharts.umd.js"></script>
+
     <script>
         var apexRetries = 0;
         function renderDashboardCharts() {

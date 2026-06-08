@@ -51,6 +51,7 @@ Route::middleware(['auth', 'role:superadmin,admin'])->prefix('admin')->name('adm
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::patch('/users/{user}/update-role', [UserController::class, 'updateRole'])->name('users.updateRole');
+    Route::patch('/users/{user}/update-attendance', [UserController::class, 'updateAttendance'])->name('users.updateAttendance');
     Route::patch('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
@@ -72,5 +73,5 @@ Route::middleware(['auth', 'role:superadmin,admin'])->prefix('admin')->name('adm
         Route::resource('soap-logs', \App\Http\Controllers\SoapLogController::class)->parameters(['soap-logs' => 'log']);
     });
     
-Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
 Route::get('/index', [DashboardController::class, 'index'])->middleware('auth')->name('index');
+Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index']);

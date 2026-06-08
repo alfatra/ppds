@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('soap_logs', function (Blueprint $table) {
-            $table->string('nama_dpjp')->nullable()->after('doctor_id');
-        });
+        if (!Schema::hasColumn('soap_logs', 'nama_dpjp')) {
+            Schema::table('soap_logs', function (Blueprint $table) {
+                $table->string('nama_dpjp')->nullable()->after('doctor_id');
+            });
+        }
     }
 
     /**
@@ -21,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('soap_logs', function (Blueprint $table) {
-            $table->dropColumn('nama_dpjp');
-        });
+        if (Schema::hasColumn('soap_logs', 'nama_dpjp')) {
+            Schema::table('soap_logs', function (Blueprint $table) {
+                $table->dropColumn('nama_dpjp');
+            });
+        }
     }
 };

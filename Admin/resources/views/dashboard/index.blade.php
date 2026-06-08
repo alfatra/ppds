@@ -166,7 +166,14 @@
                                     @foreach($diagnosisBreakdown['names'] as $index => $name)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
-                                            <td>{{ $name }}</td>
+                                            <td>
+                                                <div>
+                                                    <span class="badge bg-primary">{{ $diagnosisBreakdown['codes'][$index] ?? '-' }}</span>
+                                                </div>
+                                                <div class="mt-1">
+                                                    <strong>{{ $name }}</strong>
+                                                </div>
+                                            </td>
                                             <td class="text-end">{{ $diagnosisBreakdown['counts'][$index] ?? 0 }}</td>
                                         </tr>
                                     @endforeach
@@ -191,7 +198,7 @@
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-light border-0">
                     <h5 class="card-title mb-0">
-                        <i class="ri-team-line"></i> Aktivitas Dokter Bulan Ini
+                        <i class="ri-team-line"></i> Dokter Paling Aktif 7 Hari Terakhir
                     </h5>
                 </div>
                 <div class="card-body">
@@ -278,7 +285,7 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@latest/dist/apexcharts.umd.js"></script>
+    <script src="{{ URL::asset('build/libs/apexcharts/apexcharts.min.js') }}"></script>
     <script>
         function renderCharts() {
             console.log('[Charts] Checking ApexCharts availability...');
@@ -376,7 +383,7 @@
                     try {
                         var doctorOptions = {
                             series: [{
-                                name: 'SOAP Entries',
+                                name: 'SOAP Entries 7 Hari Terakhir',
                                 data: @json(array_column($doctorActivity, 'count'))
                             }],
                             chart: {

@@ -17,6 +17,20 @@
 					{{-- Mengarahkan form ke route 'ppds.store' --}}
 					<form action="{{ isset($ppds) ? route('ppds.update', $ppds->id) : route('ppds.store') }}" method="POST" enctype="multipart/form-data">
 						@csrf
+							@if(session('success'))
+								<div class="alert alert-success" role="alert">
+									{{ session('success') }}
+								</div>
+							@endif
+							@if($errors->any())
+								<div class="alert alert-danger" role="alert">
+									<ul class="mb-0">
+										@foreach($errors->all() as $error)
+											<li>{{ $error }}</li>
+										@endforeach
+									</ul>
+								</div>
+							@endif
 						@if(isset($ppds))
 							@method('PUT')
 						@endif
@@ -25,16 +39,22 @@
 							<label for="nama_lengkap" class="form-label">Nama Lengkap</label>
 							<div class="input-group">
 								<span class="input-group-text"><i class="ri-user-3-line"></i></span>
-								<input class="form-control" type="text" name="nama_lengkap" placeholder="Masukkan nama lengkap" id="nama_lengkap" value="{{ old('nama_lengkap', $ppds->nama_lengkap ?? '') }}" required>
+								<input class="form-control @error('nama_lengkap') is-invalid @enderror" type="text" name="nama_lengkap" placeholder="Masukkan nama lengkap" id="nama_lengkap" value="{{ old('nama_lengkap', $ppds->nama_lengkap ?? '') }}" required>
 							</div>
+							@error('nama_lengkap')
+								<div class="invalid-feedback d-block">{{ $message }}</div>
+							@enderror
 						</div>
 
 						<div class="mb-4">
 							<label for="email" class="form-label">Email</label>
 							<div class="input-group">
 								<span class="input-group-text"><i class="ri-mail-line"></i></span>
-								<input class="form-control" type="email" name="email" placeholder="contoh@email.com" id="email" value="{{ old('email', $ppds->email ?? '') }}" required>
+								<input class="form-control @error('email') is-invalid @enderror" type="email" name="email" placeholder="contoh@email.com" id="email" value="{{ old('email', $ppds->email ?? '') }}" required>
 							</div>
+							@error('email')
+								<div class="invalid-feedback d-block">{{ $message }}</div>
+							@enderror
 						</div>
 
 						<div class="mb-4">
