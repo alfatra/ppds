@@ -1,8 +1,34 @@
 @csrf
 
 <div class="mb-3">
-    <label for="patient_id" class="form-label">Patient ID</label>
-    <input type="number" class="form-control" name="patient_id" value="{{ old('patient_id', $log->patient_id ?? '') }}" required>
+    <label for="patient_search" class="form-label">Nomor Registrasi / Nama Pasien <span class="text-danger">*</span></label>
+    <div class="position-relative">
+        <input 
+            type="text" 
+            name="patient_search" 
+            id="patient_search" 
+            class="form-control @error('patient_id') is-invalid @enderror" 
+            placeholder="Masukkan nomor registrasi atau nama pasien..." 
+            autocomplete="off"
+            required>
+        <div id="patient_suggestions" class="list-group position-absolute w-100" style="display:none; top: 100%; z-index: 1000; max-height: 300px; overflow-y: auto;">
+            <!-- Patient suggestions akan ditampilkan di sini -->
+        </div>
+    </div>
+    @error('patient_id')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror
+    <small class="form-text text-muted">Ketik nomor registrasi atau nama pasien untuk mencari</small>
+</div>
+
+<!-- Hidden field untuk menyimpan patient_id yang dipilih -->
+<input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id', $log->patient_id ?? '') }}">
+
+<!-- Display patient information jika sudah dipilih -->
+<div id="patient_info_display" style="display:none;" class="alert alert-info mb-3">
+    <div><strong>Nama Pasien:</strong> <span id="display_patient_name"></span></div>
+    <div><strong>No. Registrasi:</strong> <span id="display_registration_number"></span></div>
+    <div><strong>Patient ID:</strong> <span id="display_patient_id"></span></div>
 </div>
 
 <div class="mb-3">
@@ -101,17 +127,18 @@
 @push('scripts')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const diagnosaInput = document.getElementById('diagnosa_input');
-        const diagnosaIdInput = document.getElementById('diagnosa_id');
-        const diagnosaSearchInput = document.getElementById('diagnosa_search');
-        const diagnosaTableBody = document.getElementById('diagnosa_table_body');
-        const diagnosaModal = document.getElementById('diagnosaModal');
-        const diagnosaModalObj = new bootstrap.Modal(diagnosaModal);
-        
-        let allDiagnoses = [];
-        let currentPage = 1;
-        const itemsPerPage = 20;
+    (function() {
+        function initSoapFormValidation() {
+            const diagnosaInput = document.getElementById('diagnosa_input');
+            const diagnosaIdInput = document.getElementById('diagnosa_id');
+            const diagnosaSearchInput = document.getElementById('diagnosa_search');
+            const diagnosaTableBody = document.getElementById('diagnosa_table_body');
+            const diagnosaModal = document.getElementById('diagnosaModal');
+            const diagnosaModalObj = new bootstrap.Modal(diagnosaModal);
+            
+            let allDiagnoses = [];
+            let currentPage = 1;
+            const itemsPerPage = 20;
 
         // Fetch all diagnoses when modal is shown
         diagnosaModal.addEventListener('show.bs.modal', async function() {
@@ -415,8 +442,339 @@
             setTimeout(() => alertDiv.remove(), 5000);
         }
 
+        // ============ PATIENT SEARCH AUTOCOMPLETE ============
+        const patientSearchInput = document.getElementById('patient_search');
+        const patientSuggestions = document.getElementById('patient_suggestions');
+        const patientIdInput = document.getElementById('patient_id');
+        const patientInfoDisplay = document.getElementById('patient_info_display');
+        let allPatients = [];
+        let selectedPatient = null;
+
+        // Load patients dari API saat halaman dimuat
+        async function loadPatients(searchQuery = '') {
+            try {
+                // Jika input terlihat seperti nomor registrasi (mengandung slash atau pola OPR/...),
+                // panggil endpoint detail registrasi yang mengembalikan data lengkap.
+                if (searchQuery && (searchQuery.includes('/') || /^OPR\/.+/i.test(searchQuery))) {
+                    // Try direct endpoint first (matches CI getRegistrasi behavior - no URL encoding)
+                    const regDirectUrl = `/api/registrasi-direct/${encodeURIComponent(searchQuery)}`;
+                    console.log('Trying direct registrasi endpoint:', regDirectUrl);
+
+                    let resp = await fetch(regDirectUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+                    console.log('Direct endpoint response status:', resp.status);
+
+                    // If direct endpoint fails, try encoded endpoint
+                    if (!resp.ok) {
+                        console.log('Direct endpoint failed, trying encoded endpoint...');
+                        const regUrl = `/api/registrasi/${encodeURIComponent(searchQuery)}`;
+                        resp = await fetch(regUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+                        console.log('Encoded endpoint response status:', resp.status);
+                    }
+
+                    // If response is not OK, read text and show message
+                    if (!resp.ok) {
+                        const text = await resp.text();
+                        console.error('Registrasi API returned non-OK:', resp.status, text);
+                        patientSuggestions.innerHTML = '<div class="list-group-item text-muted">Error fetching registrasi: ' + resp.status + '</div>';
+                        patientSuggestions.style.display = 'block';
+                        allPatients = [];
+                        return;
+                    }
+
+                    const contentType = resp.headers.get('content-type') || '';
+                    if (!contentType.includes('application/json')) {
+                        const text = await resp.text();
+                        console.error('Registrasi API returned non-JSON response:', text);
+                        patientSuggestions.innerHTML = '<div class="list-group-item text-muted">Unexpected response from registrasi API</div>';
+                        patientSuggestions.style.display = 'block';
+                        allPatients = [];
+                        return;
+                    }
+
+                    const body = await resp.json();
+                    console.log('Registrasi API Response:', JSON.stringify(body, null, 2));
+
+                    if (body.success && body.data) {
+                        // body.data may be object or array
+                        if (Array.isArray(body.data)) {
+                            allPatients = body.data;
+                        } else {
+                            allPatients = [body.data];
+                        }
+
+                        if (allPatients.length > 0) {
+                            showPatientSuggestions(searchQuery);
+                        } else {
+                            patientSuggestions.innerHTML = '<div class="list-group-item text-muted">Tidak ada data registrasi untuk: <strong>' + searchQuery + '</strong></div>';
+                            patientSuggestions.style.display = 'block';
+                        }
+                        return;
+                    } else {
+                        // Jika tidak success, tampilkan pesan dari API
+                        patientSuggestions.innerHTML = '<div class="list-group-item text-muted">' + (body.message || 'Tidak ada data pasien') + '</div>';
+                        patientSuggestions.style.display = 'block';
+                        allPatients = [];
+                        return;
+                    }
+                }
+
+                // Fallback: gunakan endpoint pencarian general (/api/pasien)
+                let url = '/api/pasien';
+                if (searchQuery.length > 0) {
+                    url = `/api/pasien?registrationNo=${encodeURIComponent(searchQuery)}&periodeRegistrationDate=${new Date().toISOString().split('T')[0]}`;
+                }
+
+                console.log('Fetching from:', url);
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Patient API Response:', JSON.stringify(result, null, 2));
+
+                if (result.success && result.data && Array.isArray(result.data)) {
+                    console.log('Patient count:', result.data.length);
+                    allPatients = result.data;
+
+                    if (searchQuery.length > 0 && result.data.length > 0) {
+                        showPatientSuggestions(searchQuery);
+                    } else if (searchQuery.length > 0) {
+                        patientSuggestions.innerHTML = '<div class="list-group-item text-muted">Tidak ada pasien dengan nomor registrasi: <strong>' + searchQuery + '</strong></div>';
+                        patientSuggestions.style.display = 'block';
+                    }
+                } else {
+                    console.warn('API response format unexpected:', result);
+                    allPatients = [];
+                    if (result.message && searchQuery.length > 0) {
+                        patientSuggestions.innerHTML = '<div class="list-group-item text-muted">' + result.message + '</div>';
+                        patientSuggestions.style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                allPatients = [];
+                if (patientSearchInput.value.length > 0) {
+                    showNotification('Error memuat data pasien: ' + error.message, 'danger');
+                }
+            }
+        }
+
+        // Tampilkan suggestions saat user mengetik
+        function showPatientSuggestions(query) {
+            if (query.length < 1) {
+                patientSuggestions.style.display = 'none';
+                return;
+            }
+
+            const filtered = allPatients.filter(patient => {
+                // Handle berbagai format field dari API
+                const regNumber = (patient.RegistrationNo || patient.RegistrationNumber || patient.RegNo || patient.no_registrasi || '').toString().toLowerCase();
+                const medicalNo = (patient.MedicalNo || patient.MedicalNumber || patient.NoMedis || '').toString().toLowerCase();
+                const patientName = (patient.PatientName || patient.Name || patient.nama || patient.NamePatient || '').toLowerCase();
+                const searchTerm = query.toLowerCase();
+                
+                return regNumber.includes(searchTerm) || 
+                       medicalNo.includes(searchTerm) || 
+                       patientName.includes(searchTerm);
+            });
+
+            if (filtered.length === 0) {
+                patientSuggestions.innerHTML = '<div class="list-group-item text-muted">Tidak ada pasien yang cocok</div>';
+                patientSuggestions.style.display = 'block';
+                return;
+            }
+
+            patientSuggestions.innerHTML = filtered.slice(0, 15).map((patient) => {
+                const regNumber = patient.RegistrationNo || patient.RegistrationNumber || patient.RegNo || patient.no_registrasi || '-';
+                const medicalNo = patient.MedicalNo || patient.MedicalNumber || patient.NoMedis || '-';
+                const patientName = patient.PatientName || patient.Name || patient.nama || patient.NamePatient || 'N/A';
+                const patientId = patient.PatientID || patient.ID || patient.patient_id || patient.MedicalNo || regNumber;
+                const dob = patient.DateOfBirth || patient.DOB || patient.TanggalLahir || '';
+                
+                return `
+                    <button type="button" class="list-group-item list-group-item-action py-2" 
+                            onclick="selectPatient(${JSON.stringify(patient).replace(/"/g, '&quot;')}); return false;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div style="flex: 1;">
+                                <strong>${patientName}</strong>
+                                <div class="small text-muted">
+                                    <div>Reg: ${regNumber}</div>
+                                    <div>Medical No: ${medicalNo}</div>
+                                    ${dob ? '<div>DOB: ' + dob + '</div>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            patientSuggestions.style.display = 'block';
+        }
+
+        // Pilih pasien dari suggestions
+        function selectPatient(patient) {
+            const patientName = patient.PatientName || patient.Name || patient.nama || patient.NamePatient || '';
+            const regNumber = patient.RegistrationNo || patient.RegistrationNumber || patient.RegNo || patient.no_registrasi || '';
+            const medicalNo = patient.MedicalNo || patient.MedicalNumber || patient.NoMedis || '';
+            const patientId = patient.PatientID || patient.ID || patient.patient_id || patient.MedicalNo || regNumber;
+
+            // Set input value
+            patientSearchInput.value = `${patientName} (${regNumber})`;
+            
+            // Set hidden patient_id field
+            patientIdInput.value = patientId;
+            
+            // Simpan selected patient
+            selectedPatient = patient;
+            
+            // Display patient info
+            displayPatientInfo(patient);
+            
+            // Sembunyikan suggestions
+            patientSuggestions.style.display = 'none';
+            
+            console.log('Selected patient:', {
+                name: patientName,
+                regNumber: regNumber,
+                medicalNo: medicalNo,
+                patientId: patientId,
+                fullData: patient
+            });
+        }
+        window.selectPatient = selectPatient;
+
+        // Display patient information
+        function displayPatientInfo(patient) {
+            const patientName = patient.PatientName || patient.Name || patient.nama || patient.NamePatient || 'N/A';
+            const regNumber = patient.RegistrationNo || patient.RegistrationNumber || patient.RegNo || patient.no_registrasi || '-';
+            const medicalNo = patient.MedicalNo || patient.MedicalNumber || patient.NoMedis || '-';
+            const patientId = patient.PatientID || patient.ID || patient.patient_id || patient.MedicalNo || regNumber;
+
+            document.getElementById('display_patient_name').textContent = patientName;
+            document.getElementById('display_registration_number').textContent = regNumber;
+            
+            // Update display untuk menampilkan medical number dan patient ID
+            let infoHtml = `
+                <div><strong>Nama Pasien:</strong> ${patientName}</div>
+                <div><strong>No. Registrasi:</strong> ${regNumber}</div>
+            `;
+            
+            if (medicalNo && medicalNo !== '-') {
+                infoHtml += `<div><strong>No. Medis:</strong> ${medicalNo}</div>`;
+            }
+            
+            infoHtml += `<div><strong>Patient ID:</strong> ${patientId}</div>`;
+            
+            // Tampilkan info tambahan jika ada
+            if (patient.DateOfBirth || patient.DOB || patient.TanggalLahir) {
+                const dob = patient.DateOfBirth || patient.DOB || patient.TanggalLahir;
+                infoHtml += `<div><strong>Tanggal Lahir:</strong> ${dob}</div>`;
+            }
+            
+            if (patient.Gender || patient.Jenis_Kelamin) {
+                const gender = patient.Gender || patient.Jenis_Kelamin;
+                infoHtml += `<div><strong>Jenis Kelamin:</strong> ${gender}</div>`;
+            }
+            
+            if (patient.Address || patient.Alamat) {
+                const address = patient.Address || patient.Alamat;
+                infoHtml += `<div><strong>Alamat:</strong> ${address}</div>`;
+            }
+            
+            patientInfoDisplay.innerHTML = infoHtml;
+            patientInfoDisplay.style.display = 'block';
+        }
+
+        // Event listener untuk input patient search
+        patientSearchInput.addEventListener('input', (e) => {
+            loadPatients(e.target.value);
+        });
+
+        // Sembunyikan suggestions saat klik di luar
+        document.addEventListener('click', (e) => {
+            if (e.target !== patientSearchInput && !patientSuggestions.contains(e.target)) {
+                patientSuggestions.style.display = 'none';
+            }
+        });
+
+        // Tampilkan suggestions saat focus
+        patientSearchInput.addEventListener('focus', () => {
+            if (patientSearchInput.value.length > 0) {
+                showPatientSuggestions(patientSearchInput.value);
+            } else {
+                // Load all patients saat focus tanpa query
+                loadPatients();
+            }
+        });
+
+        // ============ END PATIENT SEARCH AUTOCOMPLETE ============
+
         // Load dokter saat halaman dimuat
         loadDokters();
-    });
+
+        // Validasi form SOAP sebelum submit dan tampilkan SweetAlert jika ada field yang belum lengkap
+        const soapForm = document.getElementById('soap_log_form') || document.querySelector('form');
+        if (soapForm) {
+            soapForm.setAttribute('novalidate', 'novalidate');
+            console.log('[SOAP] validator attached to form', soapForm.id || soapForm.action);
+            soapForm.addEventListener('submit', function(event) {
+                console.log('[SOAP] submit handler fired');
+                const patientId = document.getElementById('patient_id')?.value.trim() || '';
+                const visitDate = document.getElementById('visit_date')?.value.trim() || '';
+                const namaDpjp = document.getElementById('nama_dpjp')?.value.trim() || '';
+                const subjective = document.querySelector('textarea[name="subjective"]')?.value.trim() || '';
+                const objective = document.querySelector('textarea[name="objective"]')?.value.trim() || '';
+                const assessment = document.querySelector('textarea[name="assessment"]')?.value.trim() || '';
+                const plan = document.querySelector('textarea[name="plan"]')?.value.trim() || '';
+
+                const missingFields = [];
+                if (!patientId) {
+                    missingFields.push('Pasien');
+                }
+                if (!visitDate) {
+                    missingFields.push('Tanggal Visit');
+                }
+                if (!namaDpjp) {
+                    missingFields.push('Nama DPJP');
+                }
+                if (!subjective) {
+                    missingFields.push('Subjective');
+                }
+                if (!objective) {
+                    missingFields.push('Objective');
+                }
+                if (!assessment) {
+                    missingFields.push('Assessment');
+                }
+                if (!plan) {
+                    missingFields.push('Plan');
+                }
+
+                if (missingFields.length > 0) {
+                    event.preventDefault();
+                    Swal.fire({
+                        title: 'Form SOAP belum lengkap',
+                        html: `<p>Silakan lengkapi field berikut sebelum menyimpan:</p><ul style="text-align:left;margin:0;padding-left:20px;">${missingFields.map(field => `<li>${field}</li>`).join('')}</ul>`,
+                        icon: 'warning',
+                        confirmButtonText: 'Ok'
+                    });
+                }
+            });
+        } else {
+            console.warn('[SOAP] form validator tidak ditemukan');
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSoapFormValidation);
+    } else {
+        initSoapFormValidation();
+    }
+})();
 </script>
 @endpush
