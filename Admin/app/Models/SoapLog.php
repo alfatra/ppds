@@ -16,6 +16,7 @@ class SoapLog extends Model
     'patient_id',
     'patient_name_manual',
     'patient_registration_no',
+    'medical_record_no',
     'doctor_id',
     'visit_date',
     'subjective',

@@ -41,7 +41,7 @@
         <tbody>
             @forelse($logs as $log)
                 <tr>
-                    <td>{{ $log->patient? $log->patient->name : $log->patient_id }}</td>
+                    <td>{{ $log->display_patient_name }}</td>
                     <td>{{ $log->doctor? $log->doctor->name : $log->doctor_id }}</td>
                     <td>  {{ $log->visit_date->format('d F Y, H:i') }}</td>
                     <td>{{ Str::limit($log->subjective,50) }}</td>

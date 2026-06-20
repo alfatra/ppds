@@ -88,7 +88,15 @@
             <table>
                 <tr>
                     <th>Nama Pasien</th>
-                    <td>: {{ $log->patient->name ?? 'Data tidak ditemukan' }}</td>
+                    <td>: {{ $log->display_patient_name ?? 'Data tidak ditemukan' }}</td>
+                </tr>
+                <tr>
+                    <th>No. Registrasi</th>
+                    <td>: {{ $log->patient_registration_no ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <th>No. Rekam Medis</th>
+                    <td>: {{ $log->medical_record_no ?? '-' }}</td>
                 </tr>
                 <tr>
                     <th>Tanggal Kunjungan</th>

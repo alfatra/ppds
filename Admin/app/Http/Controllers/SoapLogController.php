@@ -38,6 +38,8 @@ class SoapLogController extends Controller
                   ->orWhereHas('patient', function ($patientQuery) use ($search) {
                       $patientQuery->where('name', 'like', '%' . $search . '%');
                   })
+                  ->orWhere('patient_name_manual', 'like', '%' . $search . '%')
+                  ->orWhere('patient_registration_no', 'like', '%' . $search . '%')
                   ->orWhereHas('doctor', function ($doctorQuery) use ($search) {
                       $doctorQuery->where('name', 'like', '%' . $search . '%');
                   })
@@ -61,6 +63,9 @@ class SoapLogController extends Controller
             } else {
                 $log->api_diagnosis_name = '-';
             }
+
+            // Menentukan nama pasien yang akan ditampilkan
+            $log->display_patient_name = $log->patient_name_manual ?? ($log->patient ? $log->patient->name : $log->patient_id);
         }
 
         // Asumsi view Anda ada di resources/views/soap_logs/index.blade.php
@@ -118,6 +123,7 @@ class SoapLogController extends Controller
             'patient_id' => 'required|string', // Accept both integer ID and string
             'patient_name_manual' => 'nullable|string',
             'patient_registration_no' => 'nullable|string',
+            'medical_record_no' => 'nullable|string',
             'visit_date' => 'required|date',
             'nama_dpjp' => 'required|string|max:255',
             'subjective' => 'required|string',
@@ -175,6 +181,9 @@ class SoapLogController extends Controller
         // Eager load relasi yang ada di DB lokal (relasi 'diagnosis' tidak dipakai lagi)
         $log->load('creator', 'patient', 'doctor');
 
+        // Menentukan nama pasien yang akan ditampilkan untuk PDF
+        $log->display_patient_name = $log->patient_name_manual ?? ($log->patient ? $log->patient->name : $log->patient_id);
+            
         // Ambil nama diagnosis dari API (dengan caching)
         $diagnosisName = $this->getDiagnosisNameFromApi($log->diagnosa_id);
 
@@ -272,7 +281,10 @@ class SoapLogController extends Controller
         }
 
         $validatedData = $request->validate([
-            'patient_id' => 'required|integer',
+            'patient_id' => 'required|string',
+            'patient_name_manual' => 'nullable|string',
+            'patient_registration_no' => 'nullable|string',
+            'medical_record_no' => 'nullable|string',
             'visit_date' => 'required|date',
             'nama_dpjp' => 'required|string|max:255',
             'subjective' => 'required|string',

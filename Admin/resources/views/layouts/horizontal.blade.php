@@ -587,22 +587,7 @@
                                         <a href="auth-lock-screen" class="dropdown-item">Lock Screen</a>
                                     </div>
                                 </div>
-                                <div class="dropdown">
-                                    <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-utility"
-                                        role="button">
-                                        Utility <div class="arrow-down"></div>
-                                    </a>
-                                    <div class="dropdown-menu" aria-labelledby="topnav-utility">
-                                        <a href="pages-starter" class="dropdown-item">Starter Page</a>
-                                        <a href="pages-maintenance" class="dropdown-item">Maintenance</a>
-                                        <a href="pages-comingsoon" class="dropdown-item">Coming Soon</a>
-                                        <a href="pages-timeline" class="dropdown-item">Timeline</a>
-                                        <a href="pages-faqs" class="dropdown-item">FAQs</a>
-                                        <a href="pages-pricing" class="dropdown-item">Pricing</a>
-                                        <a href="pages-404" class="dropdown-item">Error 404</a>
-                                        <a href="pages-500" class="dropdown-item">Error 500</a>
-                                    </div>
-                                </div>
+                                <!-- Utility dropdown removed per user request -->
                             </div>
                         </li>
 

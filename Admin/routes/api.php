@@ -137,7 +137,8 @@ Route::middleware('api')->group(function () {
     // Endpoint untuk fetch patient registration dari API eksternal dengan HMAC authentication
     // Mengikuti pattern dari CodeIgniter Model_API_Medinfras
     Route::get('/pasien', function (Request $request) {
-        $apiUrl = 'http://192.168.10.33/medinfrasapi/workshop/api/registration/base/information/detail2';
+        $primaryApiUrl = 'http://192.168.10.33/medinfrasapi/rssm/api/registration/base/';
+        $fallbackApiUrl = 'http://192.168.10.33/medinfrasapi/workshop/api/registration/base/information/detail2';
         $consumerId = env('API_CONSUMER_ID');
         $consumerPassword = env('API_CONSUMER_PASSWORD');
         
@@ -145,7 +146,7 @@ Route::middleware('api')->group(function () {
         $registrationNo = $request->query('registrationNo', $request->query('regNo', ''));
         $medicalNo = $request->query('medicalNo', $request->query('medicalNumber', ''));
         $paramedicCode = $request->query('paramedicCode', $request->query('dokter', ''));
-        $departmentID = $request->query('departmentID', $request->query('department', 'OUTPATIENT'));
+        $departmentID = $request->query('departmentID', $request->query('department', '1'));
         $periodeRegistrationDate = $request->query('periodeRegistrationDate', $request->query('periode', date('Y-m-d')));
 
         // Extract date from registration number if format is OPR/YYYYMMDD/XXXXX
@@ -169,8 +170,6 @@ Route::middleware('api')->group(function () {
                 'Content-Type' => 'application/json'
             ];
 
-            // Build URL dengan parameter sesuai API requirement (CI model: skip empty params)
-            // Parameter order: DepartmentID, periodeRegistrationDate, registrationNo, medicalNo, paramedicCode
             $queryParts = [];
             if ($departmentID) {
                 $queryParts['DepartmentID'] = $departmentID;
@@ -188,113 +187,71 @@ Route::middleware('api')->group(function () {
                 $queryParts['paramedicCode'] = $paramedicCode;
             }
 
-            $fullUrl = $apiUrl . '?' . http_build_query($queryParts);
+            $primaryUrl = $primaryApiUrl . '?' . http_build_query($queryParts);
+            Log::info('Patient Registration API Request', ['url' => $primaryUrl, 'params' => $queryParts]);
 
-            Log::info('Patient Registration API Request (CI model - skip empty params)', [
-                'url' => $fullUrl,
-                'params' => $queryParts
-            ]);
+            $response = Http::withHeaders($headers)->timeout(30)->get($primaryUrl);
+            Log::info('Patient Registration API Response', ['status' => $response->status(), 'body_sample' => substr($response->body(), 0, 1000)]);
 
-            $response = Http::withHeaders($headers)->timeout(30)->get($fullUrl);
-
-            Log::info('Patient Registration API Response', [
-                'status' => $response->status(),
-                'body_sample' => substr($response->body(), 0, 500)
-            ]);
-
-            if ($response->successful()) {
-                $apiResponse = $response->json();
-                
-                Log::debug('Patient Registration Full Response', ['response' => $apiResponse]);
-                
-                // Check if Status is SUCCESS
-                if (isset($apiResponse['Status']) && $apiResponse['Status'] !== 'SUCCESS') {
-                    Log::warning('Patient Registration API returned non-SUCCESS status', [
-                        'status' => $apiResponse['Status'],
-                        'remarks' => $apiResponse['Remarks'] ?? 'No remarks'
-                    ]);
-
-                    return response()->json([
-                        'success' => false,
-                        'data' => [],
-                        'message' => $apiResponse['Remarks'] ?? 'Tidak ada data pasien',
-                        'api_status' => $apiResponse['Status'] ?? 'UNKNOWN',
-                        'api_remarks' => $apiResponse['Remarks'] ?? ''
-                    ], 200);
-                }
-
-                // Parse Data field - perlu di-decode karena berupa JSON string
-                $dataField = $apiResponse['Data'] ?? null;
-                
-                if (is_null($dataField)) {
-                    Log::info('Patient Registration API returned null Data field');
-
-                    return response()->json([
-                        'success' => false,
-                        'data' => [],
-                        'message' => 'Tidak ada data pasien yang ditemukan',
-                        'api_status' => $apiResponse['Status'] ?? null,
-                        'api_remarks' => $apiResponse['Remarks'] ?? null
-                    ], 200);
-                }
-                
-                // Jika Data adalah string JSON (sesuai pattern API), decode-nya
-                if (is_string($dataField)) {
-                    $patientList = json_decode($dataField, true);
-                    if (json_last_error() !== JSON_ERROR_NONE) {
-                        Log::error('JSON decode error: ' . json_last_error_msg());
-                        return response()->json([
-                            'success' => false,
-                            'data' => [],
-                            'message' => 'Error parsing data',
-                            'json_error' => json_last_error_msg()
-                        ], 500);
-                    }
-                } else {
-                    $patientList = $dataField;
-                }
-
-                // Ensure it's an array
-                if (!is_array($patientList)) {
-                    $patientList = [$patientList];
-                }
-
-                Log::info('Patient list parsed successfully', ['count' => count($patientList)]);
-
-                return response()->json([
-                    'success' => true,
-                    'data' => $patientList,
-                    'count' => count($patientList)
-                ]);
+            if (!$response->successful()) {
+                Log::warning('Primary registration endpoint failed, trying fallback', ['status' => $response->status(), 'body' => substr($response->body(), 0, 1000)]);
+                $fallbackUrl = $fallbackApiUrl . '?' . http_build_query($queryParts);
+                $response = Http::withHeaders($headers)->timeout(30)->get($fallbackUrl);
+                Log::info('Fallback Patient Registration API Response', ['status' => $response->status(), 'body_sample' => substr($response->body(), 0, 1000)]);
             }
 
-            // Jika response tidak successful (status code 4xx, 5xx)
-            Log::error('Patient Registration API request failed', [
-                'status' => $response->status(),
-                'body_sample' => substr($response->body(), 0, 500)
-            ]);
+            if (!$response->successful()) {
+                return response()->json([
+                    'success' => false,
+                    'data' => [],
+                    'message' => 'Patient Registration API request failed',
+                    'status' => $response->status(),
+                    'body' => substr($response->body(), 0, 1000)
+                ], 200);
+            }
 
-            $errorBody = null;
-            try {
-                $errorBody = $response->json();
-            } catch (\Exception $e) {
-                // ignore parse errors
+            $apiResponse = $response->json();
+            Log::debug('Patient Registration Full Response', ['response' => $apiResponse]);
+
+            if (isset($apiResponse['Status']) && $apiResponse['Status'] !== 'SUCCESS') {
+                return response()->json([
+                    'success' => false,
+                    'data' => [],
+                    'message' => $apiResponse['Remarks'] ?? 'Tidak ada data pasien',
+                    'api_status' => $apiResponse['Status'] ?? null,
+                    'api_remarks' => $apiResponse['Remarks'] ?? null
+                ], 200);
+            }
+
+            $dataField = $apiResponse['Data'] ?? $apiResponse;
+            if (is_string($dataField)) {
+                $patientList = json_decode($dataField, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    Log::error('JSON decode error: ' . json_last_error_msg());
+                    return response()->json([
+                        'success' => false,
+                        'data' => [],
+                        'message' => 'Error parsing data',
+                        'json_error' => json_last_error_msg()
+                    ], 500);
+                }
+            } else {
+                $patientList = $dataField;
+            }
+
+            if (is_array($patientList) && array_key_exists('RegistrationNo', $patientList)) {
+                $patientList = [$patientList];
+            }
+            if (!is_array($patientList)) {
+                $patientList = [];
             }
 
             return response()->json([
-                'success' => false,
-                'data' => [],
-                'message' => $errorBody['Remarks'] ?? 'Tidak ada data pasien',
-                'api_status' => $errorBody['Status'] ?? null,
-                'api_remarks' => $errorBody['Remarks'] ?? substr($response->body(), 0, 500)
-            ], $response->status());
-
-        } catch (\Exception $e) {
-            Log::error('Exception when calling Patient Registration API: ' . $e->getMessage(), [
-                'exception' => get_class($e),
-                'trace' => $e->getTraceAsString()
+                'success' => true,
+                'data' => $patientList
             ]);
-            
+        } catch (\Exception $e) {
+            Log::error('Exception when calling Patient Registration API: ' . $e->getMessage(), ['exception' => get_class($e), 'trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'data' => [],

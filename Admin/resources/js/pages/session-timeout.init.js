@@ -6,7 +6,7 @@ File: Session Timeout Js File
 */
 
 $.sessionTimeout({
-	keepAliveUrl: 'pages-starter',
+	keepAliveUrl: 'index',
 	logoutButton:'Logout',
 	logoutUrl: 'auth-login',
 	redirUrl: 'auth-lock-screen',

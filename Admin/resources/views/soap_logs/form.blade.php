@@ -23,6 +23,9 @@
 
 <!-- Hidden field untuk menyimpan patient_id yang dipilih -->
 <input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id', $log->patient_id ?? '') }}">
+<input type="hidden" name="patient_name_manual" id="patient_name_manual" value="{{ old('patient_name_manual', $log->patient_name_manual ?? '') }}">
+<input type="hidden" name="patient_registration_no" id="patient_registration_no" value="{{ old('patient_registration_no', $log->patient_registration_no ?? '') }}">
+<input type="hidden" name="medical_record_no" id="medical_record_no" value="{{ old('medical_record_no', $log->medical_record_no ?? '') }}">
 
 <!-- Display patient information jika sudah dipilih -->
 <div id="patient_info_display" style="display:none;" class="alert alert-info mb-3">
@@ -139,6 +142,7 @@
             let allDiagnoses = [];
             let currentPage = 1;
             const itemsPerPage = 20;
+            const apiBaseUrl = (document.querySelector('base') ? document.querySelector('base').href.replace(/\/$/, '') : window.location.origin) + '/api';
 
         // Fetch all diagnoses when modal is shown
         diagnosaModal.addEventListener('show.bs.modal', async function() {
@@ -151,7 +155,7 @@
         // Fetch all diagnoses from API
         async function fetchAllDiagnoses() {
             try {
-                const response = await fetch('/api/diagnosa', {
+                const response = await fetch(apiBaseUrl + '/diagnosa', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -304,7 +308,12 @@
         const visitDateInput = document.getElementById('visit_date');
         if (visitDateInput && !visitDateInput.value) {
             const now = new Date();
-            visitDateInput.value = now.toISOString().slice(0, 16);
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            visitDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
         }
 
         // Fetch Dokter dari API - Autocomplete Search
@@ -316,7 +325,7 @@
         // Load dokter dari API
         async function loadDokters() {
             try {
-                const response = await fetch('/api/dokter', {
+                const response = await fetch(apiBaseUrl + '/dokter', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -450,78 +459,95 @@
         let allPatients = [];
         let selectedPatient = null;
 
+        function normalizeKey(key) {
+            return key.replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, '');
+        }
+
+        function getPatientValue(patient, keys) {
+            if (!patient || typeof patient !== 'object') return '';
+
+            const objectsToSearch = [patient];
+            if (patient.Patient && typeof patient.Patient === 'object') {
+                objectsToSearch.push(patient.Patient);
+            }
+            if (patient.patient && typeof patient.patient === 'object') {
+                objectsToSearch.push(patient.patient);
+            }
+            // Cek PatientInfo field (bisa berisi nested patient data)
+            if (patient.PatientInfo) {
+                try {
+                    const patientInfo = typeof patient.PatientInfo === 'string' 
+                        ? JSON.parse(patient.PatientInfo)
+                        : patient.PatientInfo;
+                    if (typeof patientInfo === 'object') {
+                        objectsToSearch.push(patientInfo);
+                    }
+                } catch (e) {
+                    // If parse fails, continue with other objects
+                }
+            }
+
+            // Tahap 1: Exact matches di semua object
+            for (const key of keys) {
+                for (const target of objectsToSearch) {
+                    if (target[key] !== undefined && target[key] !== null && target[key] !== '') {
+                        return target[key];
+                    }
+                }
+            }
+
+            // Tahap 2: Exact normalized matches di semua object
+            for (const key of keys) {
+                const normalizedKeyName = normalizeKey(key);
+                const lowerKeyName = key.toLowerCase();
+                
+                for (const target of objectsToSearch) {
+                    const normalizedTargetKeys = Object.keys(target).reduce((map, prop) => {
+                        map[normalizeKey(prop)] = target[prop];
+                        map[prop.toLowerCase()] = target[prop];
+                        return map;
+                    }, {});
+
+                    if (normalizedTargetKeys[normalizedKeyName] !== undefined && normalizedTargetKeys[normalizedKeyName] !== null && normalizedTargetKeys[normalizedKeyName] !== '') {
+                        return normalizedTargetKeys[normalizedKeyName];
+                    }
+
+                    if (normalizedTargetKeys[lowerKeyName] !== undefined && normalizedTargetKeys[lowerKeyName] !== null && normalizedTargetKeys[lowerKeyName] !== '') {
+                        return normalizedTargetKeys[lowerKeyName];
+                    }
+                }
+            }
+
+            // Tahap 3: Fuzzy matches di semua object (sebagai fallback terakhir)
+            for (const key of keys) {
+                const normalizedKeyName = normalizeKey(key);
+                for (const target of objectsToSearch) {
+                    const normalizedTargetKeys = Object.keys(target).reduce((map, prop) => {
+                        map[normalizeKey(prop)] = target[prop];
+                        return map;
+                    }, {});
+
+                    for (const prop of Object.keys(normalizedTargetKeys)) {
+                        if (prop.includes(normalizedKeyName) || normalizedKeyName.includes(prop)) {
+                            const value = normalizedTargetKeys[prop];
+                            if (value !== undefined && value !== null && value !== '') {
+                                return value;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return '';
+        }
+
         // Load patients dari API saat halaman dimuat
         async function loadPatients(searchQuery = '') {
             try {
-                // Jika input terlihat seperti nomor registrasi (mengandung slash atau pola OPR/...),
-                // panggil endpoint detail registrasi yang mengembalikan data lengkap.
-                if (searchQuery && (searchQuery.includes('/') || /^OPR\/.+/i.test(searchQuery))) {
-                    // Try direct endpoint first (matches CI getRegistrasi behavior - no URL encoding)
-                    const regDirectUrl = `/api/registrasi-direct/${encodeURIComponent(searchQuery)}`;
-                    console.log('Trying direct registrasi endpoint:', regDirectUrl);
-
-                    let resp = await fetch(regDirectUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-                    console.log('Direct endpoint response status:', resp.status);
-
-                    // If direct endpoint fails, try encoded endpoint
-                    if (!resp.ok) {
-                        console.log('Direct endpoint failed, trying encoded endpoint...');
-                        const regUrl = `/api/registrasi/${encodeURIComponent(searchQuery)}`;
-                        resp = await fetch(regUrl, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-                        console.log('Encoded endpoint response status:', resp.status);
-                    }
-
-                    // If response is not OK, read text and show message
-                    if (!resp.ok) {
-                        const text = await resp.text();
-                        console.error('Registrasi API returned non-OK:', resp.status, text);
-                        patientSuggestions.innerHTML = '<div class="list-group-item text-muted">Error fetching registrasi: ' + resp.status + '</div>';
-                        patientSuggestions.style.display = 'block';
-                        allPatients = [];
-                        return;
-                    }
-
-                    const contentType = resp.headers.get('content-type') || '';
-                    if (!contentType.includes('application/json')) {
-                        const text = await resp.text();
-                        console.error('Registrasi API returned non-JSON response:', text);
-                        patientSuggestions.innerHTML = '<div class="list-group-item text-muted">Unexpected response from registrasi API</div>';
-                        patientSuggestions.style.display = 'block';
-                        allPatients = [];
-                        return;
-                    }
-
-                    const body = await resp.json();
-                    console.log('Registrasi API Response:', JSON.stringify(body, null, 2));
-
-                    if (body.success && body.data) {
-                        // body.data may be object or array
-                        if (Array.isArray(body.data)) {
-                            allPatients = body.data;
-                        } else {
-                            allPatients = [body.data];
-                        }
-
-                        if (allPatients.length > 0) {
-                            showPatientSuggestions(searchQuery);
-                        } else {
-                            patientSuggestions.innerHTML = '<div class="list-group-item text-muted">Tidak ada data registrasi untuk: <strong>' + searchQuery + '</strong></div>';
-                            patientSuggestions.style.display = 'block';
-                        }
-                        return;
-                    } else {
-                        // Jika tidak success, tampilkan pesan dari API
-                        patientSuggestions.innerHTML = '<div class="list-group-item text-muted">' + (body.message || 'Tidak ada data pasien') + '</div>';
-                        patientSuggestions.style.display = 'block';
-                        allPatients = [];
-                        return;
-                    }
-                }
-
-                // Fallback: gunakan endpoint pencarian general (/api/pasien)
-                let url = '/api/pasien';
+                // Gunakan endpoint pasien umum untuk semua pencarian, termasuk nomor registrasi OPR.
+                let url = `${apiBaseUrl}/pasien`;
                 if (searchQuery.length > 0) {
-                    url = `/api/pasien?registrationNo=${encodeURIComponent(searchQuery)}&periodeRegistrationDate=${new Date().toISOString().split('T')[0]}`;
+                    url = `${apiBaseUrl}/pasien?registrationNo=${encodeURIComponent(searchQuery)}&periodeRegistrationDate=${new Date().toISOString().split('T')[0]}`;
                 }
 
                 console.log('Fetching from:', url);
@@ -572,10 +598,9 @@
             }
 
             const filtered = allPatients.filter(patient => {
-                // Handle berbagai format field dari API
-                const regNumber = (patient.RegistrationNo || patient.RegistrationNumber || patient.RegNo || patient.no_registrasi || '').toString().toLowerCase();
-                const medicalNo = (patient.MedicalNo || patient.MedicalNumber || patient.NoMedis || '').toString().toLowerCase();
-                const patientName = (patient.PatientName || patient.Name || patient.nama || patient.NamePatient || '').toLowerCase();
+                const regNumber = getPatientValue(patient, ['RegistrationNumber', 'RegistrationNo', 'RegNo', 'no_registrasi', 'registrationNo', 'registration_no']).toString().toLowerCase();
+                const medicalNo = getPatientValue(patient, ['MedicalNo', 'MedicalNumber', 'NoMedis', 'medicalNo', 'medical_no', 'no_medical', 'MedicalRecordNumber', 'MedicalRecordNo', 'NoMR', 'NoRM']).toString().toLowerCase();
+                const patientName = getPatientValue(patient, ['PatientName', 'PatientFullName', 'FullName', 'Name', 'nama', 'NamePatient', 'patientName', 'full_name', 'name']).toLowerCase();
                 const searchTerm = query.toLowerCase();
                 
                 return regNumber.includes(searchTerm) || 
@@ -590,22 +615,24 @@
             }
 
             patientSuggestions.innerHTML = filtered.slice(0, 15).map((patient) => {
-                const regNumber = patient.RegistrationNo || patient.RegistrationNumber || patient.RegNo || patient.no_registrasi || '-';
-                const medicalNo = patient.MedicalNo || patient.MedicalNumber || patient.NoMedis || '-';
-                const patientName = patient.PatientName || patient.Name || patient.nama || patient.NamePatient || 'N/A';
-                const patientId = patient.PatientID || patient.ID || patient.patient_id || patient.MedicalNo || regNumber;
-                const dob = patient.DateOfBirth || patient.DOB || patient.TanggalLahir || '';
+                const regNumber = getPatientValue(patient, ['RegistrationNumber', 'RegistrationNo', 'RegNo', 'no_registrasi', 'registrationNo', 'registration_no']) || '-';
+                const medicalNo = getPatientValue(patient, ['MedicalNo', 'MedicalNumber', 'NoMedis', 'medicalNo', 'medical_no', 'no_medical', 'MedicalRecordNumber', 'MedicalRecordNo', 'NoMR', 'NoRM']) || '-';
+                const patientName = getPatientValue(patient, ['PatientName', 'PatientFullName', 'FullName', 'Name', 'nama', 'NamePatient', 'patientName', 'full_name', 'name']) || 'N/A';
+                const patientId = getPatientValue(patient, ['PatientID', 'ID', 'patient_id', 'MedicalNo', 'registrationNo', 'RegistrationNumber']) || regNumber;
+                const dob = getPatientValue(patient, ['DateOfBirth', 'DOB', 'TanggalLahir', 'dateOfBirth', 'date_of_birth', 'tanggal_lahir']) || '';
+                const penjamin = getPatientValue(patient, ['CustomerName', 'Customer', 'PayerName', 'Payer', 'Penjamin', 'Guarantor', 'Asuransi', 'Company', 'CompanyName', 'GrupCustomer', 'CustomerGroup', 'PaymentName', 'PaymentMethod']) || '';
                 
                 return `
                     <button type="button" class="list-group-item list-group-item-action py-2" 
-                            onclick="selectPatient(${JSON.stringify(patient).replace(/"/g, '&quot;')}); return false;">
+                            onclick="selectPatient(${JSON.stringify(patient).replace(/"/g, '&quot;').replace(/'/g, '&#39;')}); return false;">
                         <div class="d-flex justify-content-between align-items-start">
                             <div style="flex: 1;">
                                 <strong>${patientName}</strong>
                                 <div class="small text-muted">
                                     <div>Reg: ${regNumber}</div>
-                                    <div>Medical No: ${medicalNo}</div>
+                                    <div>No. Rekam Medis: ${medicalNo}</div>
                                     ${dob ? '<div>DOB: ' + dob + '</div>' : ''}
+                                    ${penjamin ? '<div>Penjamin: ' + penjamin + '</div>' : ''}
                                 </div>
                             </div>
                         </div>
@@ -618,16 +645,61 @@
 
         // Pilih pasien dari suggestions
         function selectPatient(patient) {
-            const patientName = patient.PatientName || patient.Name || patient.nama || patient.NamePatient || '';
-            const regNumber = patient.RegistrationNo || patient.RegistrationNumber || patient.RegNo || patient.no_registrasi || '';
-            const medicalNo = patient.MedicalNo || patient.MedicalNumber || patient.NoMedis || '';
-            const patientId = patient.PatientID || patient.ID || patient.patient_id || patient.MedicalNo || regNumber;
+            console.log('=== FULL PATIENT DATA FROM API ===', JSON.stringify(patient, null, 2));
+            console.log('=== PATIENT KEYS ===', Object.keys(patient));
+            
+            // Debug: Cek PatientInfo field (likely contains patient name)
+            if (patient.PatientInfo) {
+                console.log('=== PatientInfo (RAW) ===', patient.PatientInfo);
+                console.log('=== PatientInfo (TYPE) ===', typeof patient.PatientInfo);
+                try {
+                    const patientInfoParsed = typeof patient.PatientInfo === 'string' 
+                        ? JSON.parse(patient.PatientInfo)
+                        : patient.PatientInfo;
+                    console.log('=== PatientInfo (PARSED) ===', JSON.stringify(patientInfoParsed, null, 2));
+                    console.log('=== PatientInfo KEYS ===', Object.keys(patientInfoParsed));
+                } catch (e) {
+                    console.log('=== PatientInfo PARSE ERROR ===', e.message);
+                }
+            }
+            
+            // Debug: Tampilkan semua field yang berisi "name" atau "Name"
+            const nameFields = {};
+            for (const key in patient) {
+                if (key.toLowerCase().includes('name')) {
+                    nameFields[key] = patient[key];
+                }
+            }
+            console.log('=== NAME-RELATED FIELDS ===', nameFields);
+            
+            const patientName = getPatientValue(patient, ['PatientName', 'PatientFullName', 'FullName', 'Name', 'nama', 'NamePatient', 'patientName', 'full_name', 'name']);
+            const regNumber = getPatientValue(patient, ['RegistrationNumber', 'RegistrationNo', 'RegNo', 'no_registrasi', 'registrationNo', 'registration_no']);
+            const medicalNo = getPatientValue(patient, ['MedicalNo', 'MedicalNumber', 'NoMedis', 'medicalNo', 'medical_no', 'no_medical', 'MedicalRecordNumber', 'MedicalRecordNo', 'NoMR', 'NoRM']);
+            const patientId = getPatientValue(patient, ['PatientID', 'ID', 'patient_id', 'MedicalNo', 'registrationNo', 'RegistrationNumber']) || regNumber;
 
             // Set input value
-            patientSearchInput.value = `${patientName} (${regNumber})`;
+            patientSearchInput.value = patientName ? `${patientName} (${regNumber})` : regNumber;
             
             // Set hidden patient_id field
             patientIdInput.value = patientId;
+            
+            // Set hidden patient_name_manual field
+            const patientNameManualInput = document.getElementById('patient_name_manual');
+            if (patientNameManualInput) {
+                patientNameManualInput.value = patientName;
+            }
+            
+            // Set hidden patient_registration_no field
+            const patientRegNoInput = document.getElementById('patient_registration_no');
+            if (patientRegNoInput) {
+                patientRegNoInput.value = regNumber;
+            }
+            
+            // Set hidden medical_record_no field
+            const medicalRecordNoInput = document.getElementById('medical_record_no');
+            if (medicalRecordNoInput) {
+                medicalRecordNoInput.value = medicalNo;
+            }
             
             // Simpan selected patient
             selectedPatient = patient;
@@ -642,22 +714,42 @@
                 name: patientName,
                 regNumber: regNumber,
                 medicalNo: medicalNo,
-                patientId: patientId,
-                fullData: patient
+                patientId: patientId
             });
         }
         window.selectPatient = selectPatient;
 
         // Display patient information
         function displayPatientInfo(patient) {
-            const patientName = patient.PatientName || patient.Name || patient.nama || patient.NamePatient || 'N/A';
-            const regNumber = patient.RegistrationNo || patient.RegistrationNumber || patient.RegNo || patient.no_registrasi || '-';
-            const medicalNo = patient.MedicalNo || patient.MedicalNumber || patient.NoMedis || '-';
-            const patientId = patient.PatientID || patient.ID || patient.patient_id || patient.MedicalNo || regNumber;
-
-            document.getElementById('display_patient_name').textContent = patientName;
-            document.getElementById('display_registration_number').textContent = regNumber;
+            console.log('=== DISPLAY PATIENT INFO DEBUG ===');
+            console.log('Full patient object:', JSON.stringify(patient, null, 2));
             
+            const patientName = getPatientValue(patient, ['PatientName', 'PatientFullName', 'FullName', 'Name', 'nama', 'NamePatient', 'patientName', 'full_name', 'name']) || 'N/A';
+            const regNumber = getPatientValue(patient, ['RegistrationNumber', 'RegistrationNo', 'RegNo', 'no_registrasi', 'registrationNo', 'registration_no']) || '-';
+            const medicalNo = getPatientValue(patient, ['MedicalNo', 'MedicalNumber', 'NoMedis', 'medicalNo', 'medical_no', 'no_medical', 'MedicalRecordNumber', 'MedicalRecordNo', 'NoMR', 'NoRM']) || '-';
+            const patientId = getPatientValue(patient, ['PatientID', 'ID', 'patient_id', 'MedicalNo', 'registrationNo', 'RegistrationNumber']) || regNumber;
+            const penjamin = getPatientValue(patient, ['CustomerName', 'Customer', 'PayerName', 'Payer', 'Penjamin', 'Guarantor', 'Asuransi', 'Company', 'CompanyName', 'GrupCustomer', 'CustomerGroup', 'PaymentName', 'PaymentMethod']) || '';
+
+            console.log('Extracted values - Name:', patientName, 'RegNo:', regNumber, 'MedicalNo:', medicalNo);
+
+            const nameElement = document.getElementById('display_patient_name');
+            const regNumberElement = document.getElementById('display_registration_number');
+            const patientIdElement = document.getElementById('display_patient_id');
+            const infoElement = document.getElementById('patient_info_display');
+
+            if (nameElement) {
+                nameElement.textContent = patientName;
+            }
+            if (regNumberElement) {
+                regNumberElement.textContent = regNumber;
+            }
+            if (patientIdElement) {
+                patientIdElement.textContent = patientId;
+            }
+            if (!infoElement) {
+                return;
+            }
+
             // Update display untuk menampilkan medical number dan patient ID
             let infoHtml = `
                 <div><strong>Nama Pasien:</strong> ${patientName}</div>
@@ -665,10 +757,14 @@
             `;
             
             if (medicalNo && medicalNo !== '-') {
-                infoHtml += `<div><strong>No. Medis:</strong> ${medicalNo}</div>`;
+                infoHtml += `<div><strong>No. Rekam Medis:</strong> ${medicalNo}</div>`;
             }
             
             infoHtml += `<div><strong>Patient ID:</strong> ${patientId}</div>`;
+            
+            if (penjamin) {
+                infoHtml += `<div><strong>Penjamin:</strong> ${penjamin}</div>`;
+            }
             
             // Tampilkan info tambahan jika ada
             if (patient.DateOfBirth || patient.DOB || patient.TanggalLahir) {
@@ -686,8 +782,8 @@
                 infoHtml += `<div><strong>Alamat:</strong> ${address}</div>`;
             }
             
-            patientInfoDisplay.innerHTML = infoHtml;
-            patientInfoDisplay.style.display = 'block';
+            infoElement.innerHTML = infoHtml;
+            infoElement.style.display = 'block';
         }
 
         // Event listener untuk input patient search
@@ -724,7 +820,7 @@
             console.log('[SOAP] validator attached to form', soapForm.id || soapForm.action);
             soapForm.addEventListener('submit', function(event) {
                 console.log('[SOAP] submit handler fired');
-                const patientId = document.getElementById('patient_id')?.value.trim() || '';
+                const patientId = document.getElementById('patient_id')?.value.trim() || document.getElementById('patient_search')?.value.trim() || '';
                 const visitDate = document.getElementById('visit_date')?.value.trim() || '';
                 const namaDpjp = document.getElementById('nama_dpjp')?.value.trim() || '';
                 const subjective = document.querySelector('textarea[name="subjective"]')?.value.trim() || '';
