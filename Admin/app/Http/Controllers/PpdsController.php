@@ -47,6 +47,7 @@ public function edit(Ppds $ppds)
             'agama' => 'nullable|string',
             'alamat' => 'nullable|string',
             'berkas' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:5120', // Validasi file (maks 5MB)
+            'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Validasi foto (maks 2MB)
         ]);
 
         // 2. Handle file upload jika ada
@@ -56,10 +57,22 @@ public function edit(Ppds $ppds)
             $validatedData['path_berkas'] = $path;
         }
 
-        // 2. Simpan data ke database
+        // Handle foto_profil
+        if ($request->has('gunakan_foto_profil') && $request->gunakan_foto_profil) {
+            $user = auth()->user();
+            if ($user && $user->profile_photo_path) {
+                // Gunakan foto profil user
+                $validatedData['foto_profil'] = $user->profile_photo_path;
+            }
+        } elseif ($request->hasFile('foto_profil')) {
+            $fotoPath = $request->file('foto_profil')->store('foto_ppds', 'public');
+            $validatedData['foto_profil'] = $fotoPath;
+        }
+
+        // 3. Simpan data ke database
         Ppds::create($validatedData);
 
-        // 3. Redirect ke halaman daftar dengan pesan sukses
+        // 4. Redirect ke halaman daftar dengan pesan sukses
         return redirect()->route('ppds.index')
                          ->with('success', 'Data PPDS berhasil ditambahkan.');
     }
@@ -73,6 +86,7 @@ public function update(Request $request, Ppds $ppds)
         'agama' => 'nullable|string|max:50',
         'alamat' => 'nullable|string',
         'berkas' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:5120',
+        'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
     ]);
 
     // Handle file upload jika ada file baru
@@ -85,6 +99,21 @@ public function update(Request $request, Ppds $ppds)
         // Simpan file baru dan update path
         $path = $request->file('berkas')->store('berkas_ppds', 'public');
         $validatedData['path_berkas'] = $path;
+    }
+
+    // Handle foto_profil update
+    if ($request->has('gunakan_foto_profil') && $request->gunakan_foto_profil) {
+        $user = auth()->user();
+        if ($user && $user->profile_photo_path) {
+            $validatedData['foto_profil'] = $user->profile_photo_path;
+        }
+    } elseif ($request->hasFile('foto_profil')) {
+        // Hapus foto lama jika ada
+        if ($ppds->foto_profil && !str_contains($ppds->foto_profil, 'profile-photos')) {
+             // Opsional: Storage::disk('public')->delete($ppds->foto_profil);
+        }
+        $fotoPath = $request->file('foto_profil')->store('foto_ppds', 'public');
+        $validatedData['foto_profil'] = $fotoPath;
     }
 
     $oldEmail = $ppds->email;

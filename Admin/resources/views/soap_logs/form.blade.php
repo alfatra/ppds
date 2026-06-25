@@ -1,91 +1,120 @@
 @csrf
 
-<div class="mb-3">
-    <label for="patient_search" class="form-label">Nomor Registrasi / Nama Pasien <span class="text-danger">*</span></label>
-    <div class="position-relative">
-        <input 
-            type="text" 
-            name="patient_search" 
-            id="patient_search" 
-            class="form-control @error('patient_id') is-invalid @enderror" 
-            placeholder="Masukkan nomor registrasi atau nama pasien..." 
-            autocomplete="off"
-            required>
-        <div id="patient_suggestions" class="list-group position-absolute w-100" style="display:none; top: 100%; z-index: 1000; max-height: 300px; overflow-y: auto;">
-            <!-- Patient suggestions akan ditampilkan di sini -->
+<!-- DATA PASIEN & KUNJUNGAN -->
+<div class="card border border-light bg-light shadow-none mb-4">
+    <div class="card-body">
+        <h5 class="font-size-15 mb-3 text-primary"><i class="ri-user-heart-line me-1"></i> Data Pasien & Kunjungan</h5>
+        
+        <div class="mb-4">
+            <label for="patient_search" class="form-label fw-bold">Pencarian Pasien (No. Reg / Nama) <span class="text-danger">*</span></label>
+            <div class="position-relative">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="ri-search-line text-muted"></i></span>
+                    <input 
+                        type="text" 
+                        name="patient_search" 
+                        id="patient_search" 
+                        class="form-control form-control-lg @error('patient_id') is-invalid @enderror" 
+                        placeholder="Ketik nomor registrasi atau nama pasien..." 
+                        autocomplete="off"
+                        required>
+                </div>
+                <div id="patient_suggestions" class="list-group position-absolute w-100 shadow-lg border-0" style="display:none; top: 100%; z-index: 1000; max-height: 300px; overflow-y: auto; border-radius: 0 0 0.5rem 0.5rem;">
+                    <!-- Patient suggestions akan ditampilkan di sini -->
+                </div>
+            </div>
+            @error('patient_id')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+            <small class="form-text text-muted mt-2"><i class="ri-information-line me-1"></i>Data ditarik otomatis dan terintegrasi secara *real-time* dari server Medinfras.</small>
+        </div>
+
+        <!-- Hidden field untuk menyimpan data pasien -->
+        <input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id', $log->patient_id ?? '') }}">
+        <input type="hidden" name="patient_name_manual" id="patient_name_manual" value="{{ old('patient_name_manual', $log->patient_name_manual ?? '') }}">
+        <input type="hidden" name="patient_registration_no" id="patient_registration_no" value="{{ old('patient_registration_no', $log->patient_registration_no ?? '') }}">
+        <input type="hidden" name="medical_record_no" id="medical_record_no" value="{{ old('medical_record_no', $log->medical_record_no ?? '') }}">
+
+        <!-- Display patient information jika sudah dipilih -->
+        <div id="patient_info_display" style="display:none;" class="alert alert-info border-0 shadow-sm mb-4">
+            <div><strong>Nama Pasien:</strong> <span id="display_patient_name"></span></div>
+            <div><strong>No. Registrasi:</strong> <span id="display_registration_number"></span></div>
+            <div><strong>Patient ID:</strong> <span id="display_patient_id"></span></div>
+        </div>
+
+        <div class="mb-2">
+            <label for="visit_date" class="form-label fw-bold text-muted"><i class="ri-calendar-event-line text-primary me-1"></i> Tanggal Visit</label>
+            <input type="datetime-local" class="form-control form-control-lg bg-white" name="visit_date" id="visit_date" value="{{ old('visit_date', isset($log->visit_date) ? $log->visit_date->format('Y-m-d\TH:i') : '') }}">
         </div>
     </div>
-    @error('patient_id')
-        <div class="invalid-feedback d-block">{{ $message }}</div>
-    @enderror
-    <small class="form-text text-muted">Ketik nomor registrasi atau nama pasien untuk mencari</small>
 </div>
 
-<!-- Hidden field untuk menyimpan patient_id yang dipilih -->
-<input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id', $log->patient_id ?? '') }}">
-<input type="hidden" name="patient_name_manual" id="patient_name_manual" value="{{ old('patient_name_manual', $log->patient_name_manual ?? '') }}">
-<input type="hidden" name="patient_registration_no" id="patient_registration_no" value="{{ old('patient_registration_no', $log->patient_registration_no ?? '') }}">
-<input type="hidden" name="medical_record_no" id="medical_record_no" value="{{ old('medical_record_no', $log->medical_record_no ?? '') }}">
+<!-- PEMERIKSAAN MEDIS (SOAP) -->
+<div class="card border border-light bg-light shadow-none mb-4">
+    <div class="card-body">
+        <h5 class="font-size-15 mb-3 text-success"><i class="ri-heart-pulse-line me-1"></i> Pemeriksaan Medis (SOAP)</h5>
 
-<!-- Display patient information jika sudah dipilih -->
-<div id="patient_info_display" style="display:none;" class="alert alert-info mb-3">
-    <div><strong>Nama Pasien:</strong> <span id="display_patient_name"></span></div>
-    <div><strong>No. Registrasi:</strong> <span id="display_registration_number"></span></div>
-    <div><strong>Patient ID:</strong> <span id="display_patient_id"></span></div>
-</div>
+        <div class="mb-4">
+            <label for="diagnosa_input" class="form-label fw-bold"><i class="ri-stethoscope-line text-success me-1"></i> Diagnosa Utama</label>
+            <div class="input-group input-group-lg">
+                <input type="text" class="form-control bg-white" id="diagnosa_input" placeholder="Klik tombol cari untuk memilih diagnosa..." readonly>
+                <button class="btn btn-success waves-effect waves-light" type="button" id="btn_diagnosa_modal" data-bs-toggle="modal" data-bs-target="#diagnosaModal">
+                    <i class="ri-search-line me-1"></i> Cari Diagnosa
+                </button>
+            </div>
+            <input type="hidden" name="diagnosa_id" id="diagnosa_id" value="{{ old('diagnosa_id', $log->diagnosa_id ?? '') }}">
+            <small class="form-text text-muted mt-2">Diagnosa sesuai standar ICD-10 Medinfras</small>
+        </div>
 
-<div class="mb-3">
-    <label for="visit_date" class="form-label">Visit Date</label>
-    <input type="datetime-local" class="form-control" name="visit_date" id="visit_date" value="{{ old('visit_date', isset($log->visit_date) ? $log->visit_date->format('Y-m-d\TH:i') : '') }}">
-</div>
-
-<div class="mb-3">
-    <label for="diagnosa_input" class="form-label">Diagnosa</label>
-    <div class="input-group">
-        <input type="text" class="form-control" id="diagnosa_input" placeholder="Klik untuk memilih diagnosa..." readonly>
-        <button class="btn btn-outline-secondary" type="button" id="btn_diagnosa_modal" data-bs-toggle="modal" data-bs-target="#diagnosaModal">
-            <i class="fas fa-search"></i> Cari
-        </button>
-    </div>
-    <input type="hidden" name="diagnosa_id" id="diagnosa_id" value="{{ old('diagnosa_id', $log->diagnosa_id ?? '') }}">
-    <small class="form-text text-muted">Klik tombol Cari untuk memilih diagnosa</small>
-</div>
-
-<div class="mb-3">
-    <label class="form-label">Subjective</label>
-    <textarea class="form-control" name="subjective" rows="3">{{ old('subjective', $log->subjective ?? '') }}</textarea>
-</div>
-<div class="mb-3">
-    <label class="form-label">Objective</label>
-    <textarea class="form-control" name="objective" rows="3">{{ old('objective', $log->objective ?? '') }}</textarea>
-</div>
-<div class="mb-3">
-    <label class="form-label">Assessment</label>
-    <textarea class="form-control" name="assessment" rows="3">{{ old('assessment', $log->assessment ?? '') }}</textarea>
-</div>
-<div class="mb-3">
-    <label class="form-label">Plan</label>
-    <textarea class="form-control" name="plan" rows="3">{{ old('plan', $log->plan ?? '') }}</textarea>
-</div>
-<div class="form-group mb-3">
-    <label for="nama_dpjp">Nama DPJP <span class="text-danger">*</span></label>
-    <div class="position-relative">
-        <input 
-            type="text" 
-            name="nama_dpjp" 
-            id="nama_dpjp" 
-            class="form-control @error('nama_dpjp') is-invalid @enderror" 
-            placeholder="Ketik untuk mencari dokter..." 
-            autocomplete="off"
-            required>
-        <div id="dokter_suggestions" class="list-group position-absolute w-100" style="display:none; top: 100%; z-index: 1000; max-height: 300px; overflow-y: auto;">
-            <!-- Suggestions akan ditampilkan di sini -->
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold text-muted">S - Subjective</label>
+                <textarea class="form-control" name="subjective" rows="4" placeholder="Keluhan utama pasien yang dirasakan...">{{ old('subjective', $log->subjective ?? '') }}</textarea>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold text-muted">O - Objective</label>
+                <textarea class="form-control" name="objective" rows="4" placeholder="Hasil pemeriksaan fisik, lab, dan penunjang...">{{ old('objective', $log->objective ?? '') }}</textarea>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold text-muted">A - Assessment</label>
+                <textarea class="form-control" name="assessment" rows="4" placeholder="Penilaian medis / Kesimpulan diagnosis...">{{ old('assessment', $log->assessment ?? '') }}</textarea>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold text-muted">P - Plan</label>
+                <textarea class="form-control" name="plan" rows="4" placeholder="Rencana pengobatan, terapi, atau tindakan...">{{ old('plan', $log->plan ?? '') }}</textarea>
+            </div>
         </div>
     </div>
-    @error('nama_dpjp')
-        <div class="invalid-feedback d-block">{{ $message }}</div>
-    @enderror
-    <small class="form-text text-muted">Ketik nama dokter untuk mencari</small>
+</div>
+
+<!-- DATA DPJP -->
+<div class="card border border-light bg-light shadow-none mb-4">
+    <div class="card-body">
+        <h5 class="font-size-15 mb-3 text-info"><i class="ri-nurse-line me-1"></i> Data DPJP (Dokter Penanggung Jawab)</h5>
+
+        <div class="form-group mb-2">
+            <label for="nama_dpjp" class="form-label fw-bold text-muted">Pilih DPJP <span class="text-danger">*</span></label>
+            <div class="position-relative">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="ri-user-search-line text-muted"></i></span>
+                    <input 
+                        type="text" 
+                        name="nama_dpjp" 
+                        id="nama_dpjp" 
+                        class="form-control form-control-lg @error('nama_dpjp') is-invalid @enderror" 
+                        placeholder="Ketik nama dokter untuk mencari..." 
+                        autocomplete="off"
+                        required>
+                </div>
+                <div id="dokter_suggestions" class="list-group position-absolute w-100 shadow-lg border-0" style="display:none; top: 100%; z-index: 1000; max-height: 300px; overflow-y: auto; border-radius: 0 0 0.5rem 0.5rem;">
+                    <!-- Suggestions akan ditampilkan di sini -->
+                </div>
+            </div>
+            @error('nama_dpjp')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+        </div>
+    </div>
 </div>
 
 <!-- Modal Diagnosa -->
@@ -302,6 +331,16 @@
 
             // tutup modal
             diagnosaModalObj.hide();
+
+            Swal.fire({
+                title: 'Diagnosa Dipilih!',
+                text: `${diagnoseID} - ${diagnoseName}`,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
         }
 
         // Set visit_date to current date/time if empty
@@ -418,6 +457,16 @@
         function selectDokter(nama) {
             dokterInput.value = nama; 
             dokterSuggestions.style.display = 'none';
+            
+            Swal.fire({
+                title: 'DPJP Terpilih!',
+                text: nama,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
         }
         window.selectDokter = selectDokter;
         // Event listener untuk input
@@ -710,6 +759,16 @@
             // Sembunyikan suggestions
             patientSuggestions.style.display = 'none';
             
+            Swal.fire({
+                title: 'Pasien Terpilih!',
+                text: `${patientName} (${medicalNo})`,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+            
             console.log('Selected patient:', {
                 name: patientName,
                 regNumber: regNumber,
@@ -746,7 +805,7 @@
             if (patientIdElement) {
                 patientIdElement.textContent = patientId;
             }
-            if (!infoElement) {
+            if (!infoElement) {+
                 return;
             }
 

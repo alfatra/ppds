@@ -48,3 +48,4 @@ class DiagnosisSeeder extends Seeder
         $this->command->info('✓ ' . count($diagnoses) . ' diagnosis records seeded successfully!');
     }
 }
+

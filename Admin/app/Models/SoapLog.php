@@ -35,7 +35,7 @@ class SoapLog extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'visit_date' => 'date',
+        'visit_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

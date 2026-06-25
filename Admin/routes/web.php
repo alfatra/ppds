@@ -54,6 +54,9 @@ Route::middleware(['auth', 'role:superadmin,admin'])->prefix('admin')->name('adm
     Route::patch('/users/{user}/update-attendance', [UserController::class, 'updateAttendance'])->name('users.updateAttendance');
     Route::patch('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    
+    // Master Data Tindakan Medis
+    Route::resource('medical-activities', \App\Http\Controllers\MedicalActivityController::class)->except(['show']);
 });
 
     // Grup Rute untuk Manajemen PPDS 
@@ -72,6 +75,8 @@ Route::middleware(['auth', 'role:superadmin,admin'])->prefix('admin')->name('adm
         Route::get('/{ppds}/download', [PpdsController::class, 'downloadBerkas'])->name('download');
         Route::resource('soap-logs', \App\Http\Controllers\SoapLogController::class)->parameters(['soap-logs' => 'log']);
     });
+    
+Route::resource('daily-activities', \App\Http\Controllers\DailyActivityController::class)->middleware('auth');
     
 Route::get('/index', [DashboardController::class, 'index'])->middleware('auth')->name('index');
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index']);

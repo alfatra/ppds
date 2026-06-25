@@ -150,11 +150,11 @@
                                 style="background-color: {{ $dayData['is_present'] ? '#d4edda' : '#f8f9fa' }}">
                                 @if($dayData['is_present'])
                                     <span class="badge bg-success p-2" data-bs-toggle="tooltip" 
-                                          title="{{ $dayData['soap_count'] }} SOAP entry(ies)">
+                                          title="{{ $dayData['soap_count'] }} SOAP, {{ $dayData['activity_count'] }} Activity">
                                         <i class="mdi mdi-check-circle-outline"></i>
                                     </span>
-                                    @if($dayData['soap_count'] > 1)
-                                    <small class="d-block text-muted">{{ $dayData['soap_count'] }}x</small>
+                                    @if($dayData['soap_count'] > 0 || $dayData['activity_count'] > 0)
+                                    <small class="d-block text-muted">S:{{ $dayData['soap_count'] }} A:{{ $dayData['activity_count'] }}</small>
                                     @endif
                                 @else
                                     <span class="badge bg-light text-dark p-2">
@@ -173,10 +173,13 @@
             <div class="mt-3 pt-3 border-top">
                 <p class="mb-2"><strong>Legend:</strong></p>
                 <span class="badge bg-success p-2 me-2">
-                    <i class="mdi mdi-check-circle-outline"></i> Present (Has SOAP entry)
+                    <i class="mdi mdi-check-circle-outline"></i> Present (Has SOAP or Activity)
                 </span>
                 <span class="badge bg-light text-dark p-2">
-                    <i class="mdi mdi-minus-circle-outline"></i> Absent (No SOAP entry)
+                    <i class="mdi mdi-minus-circle-outline"></i> Absent (No Entries)
+                </span>
+                <span class="ms-3 text-muted">
+                    <small><strong>S:</strong> SOAP Logs Count | <strong>A:</strong> Daily Activities Count</small>
                 </span>
             </div>
 
@@ -259,18 +262,37 @@
         fetch(`{{ route('attendance.detail') }}?user_id=${userId}&date=${date}`)
             .then(response => response.json())
             .then(data => {
-                if (data.length === 0) {
-                    modalBody.innerHTML = '<div class="alert alert-info">No SOAP entries found for this date.</div>';
+                if (data.soap_logs.length === 0 && data.daily_activities.length === 0) {
+                    modalBody.innerHTML = '<div class="alert alert-info">No entries found for this date.</div>';
                 } else {
-                    let html = '<div class="table-responsive"><table class="table table-sm"><thead class="table-light"><tr><th>Patient</th><th>Diagnose</th><th>Time</th></tr></thead><tbody>';
-                    data.forEach(log => {
-                        html += `<tr>
-                            <td>${log.patient ? log.patient.name : log.patient_name_manual || 'N/A'}</td>
-                            <td>${log.diagnosis ? log.diagnosis.diagnose_name : 'N/A'}</td>
-                            <td>${new Date(log.visit_date).toLocaleString()}</td>
-                        </tr>`;
-                    });
-                    html += '</tbody></table></div>';
+                    let html = '';
+                    
+                    if (data.soap_logs.length > 0) {
+                        html += '<h6>SOAP Logs</h6>';
+                        html += '<div class="table-responsive"><table class="table table-sm"><thead class="table-light"><tr><th>Patient</th><th>Diagnose</th><th>Time</th></tr></thead><tbody>';
+                        data.soap_logs.forEach(log => {
+                            html += `<tr>
+                                <td>${log.patient ? log.patient.name : log.patient_name_manual || 'N/A'}</td>
+                                <td>${log.diagnosis ? log.diagnosis.diagnose_name : 'N/A'}</td>
+                                <td>${new Date(log.visit_date).toLocaleString()}</td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
+                    if (data.daily_activities.length > 0) {
+                        html += '<h6 class="mt-3">Daily Activities</h6>';
+                        html += '<div class="table-responsive"><table class="table table-sm"><thead class="table-light"><tr><th>Activity</th><th>Patient</th><th>Time</th></tr></thead><tbody>';
+                        data.daily_activities.forEach(log => {
+                            html += `<tr>
+                                <td>${log.medical_activity ? log.medical_activity.name : 'N/A'}</td>
+                                <td>${log.patient_name || 'N/A'}</td>
+                                <td>${new Date(log.activity_date).toLocaleDateString()}</td>
+                            </tr>`;
+                        });
+                        html += '</tbody></table></div>';
+                    }
+
                     modalBody.innerHTML = html;
                 }
                 modal.show();
@@ -278,6 +300,7 @@
             .catch(error => {
                 modalBody.innerHTML = '<div class="alert alert-danger">Error loading SOAP entries: ' + error.message + '</div>';
                 modal.show();
+                
             });
     }
 </script>

@@ -7,66 +7,65 @@
         <div id="sidebar-menu">
             <!-- Left Menu Start -->
             <ul class="metismenu list-unstyled" id="side-menu">
-                <li class="menu-title">Menu</li>
+                <li class="menu-title">Utama</li>
 
                 <li>
                     <a href="index" class="waves-effect">
-                        <i class="ri-dashboard-line"></i><span class="badge rounded-pill bg-success float-end">3</span>
+                        <i class="ri-dashboard-line"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
 
-                {{-- Menu Data PPDS hanya untuk admin dan superadmin --}}
                 @if(in_array(Auth::user()->role, ['admin', 'superadmin']))
+                <li class="menu-title">Administrator</li>
+                
                 <li>
-                    <a href="{{ route('ppds.index') }}" class="waves-effect">
-                        <i class="ri-user-add-line"></i>
-                        <span>Data PPDS</span>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="ri-database-2-line"></i>
+                        <span>Master Data</span>
                     </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('admin.users.index') }}">Pengguna Sistem</a></li>
+                        <li><a href="{{ route('ppds.index') }}">Data Peserta PPDS</a></li>
+                        <li><a href="{{ route('admin.medical-activities.index') }}">Tindakan Medis</a></li>
+                    </ul>
                 </li>
                 @endif
 
-                {{-- Menu Manajemen Pengguna hanya untuk admin dan superadmin --}}
-                @if(in_array(Auth::user()->role, ['admin', 'superadmin']))
-                    <li>
-                        <a href="{{ route('admin.users.index') }}" class="waves-effect">
-                            <i class="ri-user-settings-line"></i>
-                            <span>Manajemen Pengguna</span>
-                        </a>
-                    </li>
-                    @endif
-
-            <li>
-                <a href="javascript: void(0);" class="has-arrow waves-effect">
-                    <i class="fas fa-notes-medical"></i>
-                    <span>Loogbook</span>
-                </a>
-                <ul class="sub-menu" aria-expanded="false">
-                    <li><a href="#">Kegiatan Harian</a></li>
-                    <li><a href="{{ route('ppds.soap-logs.index') }}">Laporan SOAP</a></li>
-                    <li><a href="#">Tindakan Medis</a></li>
-                </ul>
-            </li>
-
-            <li>
-                <a href="{{ route('attendance.index') }}" class="waves-effect">
-                    <i class="ri-fingerprint-line"></i>
-                    <span>Absensi</span>
-                </a>
-            </li>
-
+                <li class="menu-title">Aktivitas PPDS</li>
 
                 <li>
-                    <a href="calendar" class=" waves-effect">
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="ri-book-read-line"></i>
+                        <span>Logbook</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="{{ route('daily-activities.index') }}">Kegiatan Harian</a></li>
+                        <li><a href="{{ route('ppds.soap-logs.index') }}">Laporan SOAP</a></li>
+                        <li><a href="#">Tindakan Medis</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="{{ route('attendance.index') }}" class="waves-effect">
+                        <i class="ri-fingerprint-line"></i>
+                        <span>Absensi</span>
+                    </a>
+                </li>
+
+                <li class="menu-title">Aplikasi Tambahan</li>
+
+                <li>
+                    <a href="calendar" class="waves-effect">
                         <i class="ri-calendar-2-line"></i>
-                        <span>Calendar</span>
+                        <span>Kalender</span>
                     </a>
                 </li>
 
                 <li>
-                    <a href="apps-chat" class=" waves-effect">
+                    <a href="apps-chat" class="waves-effect">
                         <i class="ri-chat-1-line"></i>
-                        <span>Chat</span>
+                        <span>Pesan Chat</span>
                     </a>
                 </li>
                 

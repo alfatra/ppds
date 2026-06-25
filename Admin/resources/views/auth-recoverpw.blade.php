@@ -17,9 +17,8 @@
                                                     <a href="index" class="">
                                                         <img src="{{ URL::asset('build/images/logo-dark.png') }}" alt="" height="20" class="auth-logo logo-dark mx-auto">
                                                         <img src="{{ URL::asset('build/images/logo-sm-light.png') }}" alt="" height="20" class="auth-logo logo-light mx-auto">
-                                                    </a>
+                                                  </a>
                                                 </div>
-    
                                                 <h4 class="font-size-18 mt-4">Reset Password</h4>
                                                 <p class="text-muted">Reset your password to Nazox.</p>
                                             </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\SoapLog;
+use App\Models\DailyActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 class AttendanceController extends Controller
 {
     /**
-     * Menampilkan halaman utama absensi berdasarkan SOAP logs.
+     * Menampilkan halaman utama absensi berdasarkan SOAP logs dan Kegiatan Harian.
      */
     public function index(Request $request)
     {
@@ -47,10 +48,17 @@ class AttendanceController extends Controller
         }
 
         // Get all SOAP logs for the date range
-        $soapLogs = SoapLog::whereBetween('visit_date', [$startDate, $endDate])
+        $soapLogs = SoapLog::whereBetween('visit_date', [$startDate->copy()->startOfDay(), $endDate->copy()->endOfDay()])
             ->get()
             ->groupBy(function ($log) {
-                return $log->doctor_id . '|' . $log->visit_date->format('Y-m-d');
+                return $log->doctor_id . '|' . Carbon::parse($log->visit_date)->format('Y-m-d');
+            });
+
+        // Get all Daily Activities for the date range
+        $dailyActivities = DailyActivity::whereBetween('activity_date', [$startDate->copy()->startOfDay(), $endDate->copy()->endOfDay()])
+            ->get()
+            ->groupBy(function ($activity) {
+                return $activity->user_id . '|' . Carbon::parse($activity->activity_date)->format('Y-m-d');
             });
 
         // Build attendance data
@@ -64,27 +72,17 @@ class AttendanceController extends Controller
 
             foreach ($dateRange as $date) {
                 $dateKey = $ppds->id . '|' . $date->format('Y-m-d');
-                $hasSOAPLog = false;
+                $hasSOAPLog = isset($soapLogs[$dateKey]);
+                $hasDailyActivity = isset($dailyActivities[$dateKey]);
 
-                // Check if this PPDS has a SOAP log for this date
-                foreach ($soapLogs as $key => $logs) {
-                    if (strpos($key, $ppds->id . '|' . $date->format('Y-m-d')) === 0) {
-                        $hasSOAPLog = true;
-                        break;
-                    }
-                }
+                $isPresent = $hasSOAPLog || $hasDailyActivity;
 
                 $attendance['days'][$date->format('Y-m-d')] = [
                     'date' => $date,
-                    'is_present' => $hasSOAPLog,
-                    'soap_count' => 0
+                    'is_present' => $isPresent,
+                    'soap_count' => $hasSOAPLog ? count($soapLogs[$dateKey]) : 0,
+                    'activity_count' => $hasDailyActivity ? count($dailyActivities[$dateKey]) : 0
                 ];
-
-                // Count SOAP logs for this day
-                if ($hasSOAPLog) {
-                    $key = $ppds->id . '|' . $date->format('Y-m-d');
-                    $attendance['days'][$date->format('Y-m-d')]['soap_count'] = count($soapLogs[$key] ?? []);
-                }
             }
 
             $attendanceData[] = $attendance;
@@ -130,7 +128,7 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Get SOAP logs detail for a specific PPDS on a specific date
+     * Get detail for a specific PPDS on a specific date (both SOAP logs and Daily Activities)
      */
     public function getDetail(Request $request)
     {
@@ -143,11 +141,19 @@ class AttendanceController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $logs = SoapLog::where('doctor_id', $userId)
+        $soapLogs = SoapLog::where('doctor_id', $userId)
             ->whereDate('visit_date', $date)
             ->with('patient', 'diagnosis')
             ->get();
 
-        return response()->json($logs);
+        $dailyActivities = DailyActivity::where('user_id', $userId)
+            ->whereDate('activity_date', $date)
+            ->with('medicalActivity')
+            ->get();
+
+        return response()->json([
+            'soap_logs' => $soapLogs,
+            'daily_activities' => $dailyActivities
+        ]);
     }
 }

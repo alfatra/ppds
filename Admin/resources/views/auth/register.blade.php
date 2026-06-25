@@ -93,7 +93,7 @@
                                                 </div>
 
                                                 <div class="mt-4 text-center">
-                                                    <p class="mb-0">By registering you agree to the Nazox <a
+                                                    <p class="mb-0">registrasi anda akan di setujui oleh SIMRS <a
                                                             href="#" class="text-primary">Terms of Use</a></p>
                                                 </div>
                                             </form>
