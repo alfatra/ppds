@@ -80,3 +80,5 @@ Route::resource('daily-activities', \App\Http\Controllers\DailyActivityControlle
     
 Route::get('/index', [DashboardController::class, 'index'])->middleware('auth')->name('index');
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index']);
+
+Route::get('/debug-create', function() { return view('soap_logs.create'); });

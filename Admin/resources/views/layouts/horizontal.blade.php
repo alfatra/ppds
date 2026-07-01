@@ -445,7 +445,7 @@
                             <div class="dropdown-menu" aria-labelledby="topnav-apps">
 
                                 <a href="calendar" class="dropdown-item">Calendar</a>
-                                <a href="apps-chat" class="dropdown-item">Chat</a>
+                                {{-- Chat menu removed per request --}}
                                 {{-- Email dropdown removed --}}
                                 <div class="dropdown">
                                     <a class="dropdown-item dropdown-toggle arrow-none" href="#" id="topnav-ecommerce"

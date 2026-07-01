@@ -1,5 +1,444 @@
-@csrf
+<!doctype html>
+<html lang="en">
 
+<head>
+    <meta charset="utf-8" />
+    <title>New SOAP Log | Nazox - Admin & Dashboard Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="http://localhost">
+    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
+    <meta content="Themesdesign" name="author" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="http://localhost/build/images/logo_rssm.png">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+</head>
+    <!-- Bootstrap Css -->
+<link href="http://localhost/build/css/bootstrap.min.css" id="bootstrap-style" rel="stylesheet" type="text/css" />
+<!-- Icons Css -->
+<link href="http://localhost/build/css/icons.min.css" rel="stylesheet" type="text/css" />
+<!-- App Css-->
+<link href="http://localhost/build/css/app.min.css" id="app-style" rel="stylesheet" type="text/css" />            <!-- ... file-file CSS lainnya ... -->
+
+        <!-- Sweet Alert-->
+        <link href="http://localhost/build/libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css" />
+                 
+    </head>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+
+<body data-sidebar="dark">
+    <!-- Begin page -->
+    <div id="layout-wrapper">
+        <header id="page-topbar">
+    <div class="navbar-header">
+        <div class="d-flex">
+            <!-- LOGO -->
+            <div class="navbar-brand-box">
+                <a href="index" class="logo logo-dark">
+                    <span class="logo-sm">
+                        <img src="http://localhost/build/images/logo.png" alt="logo-sm-dark" height="22">
+                    </span>
+                    <span class="logo-lg">
+                        <img src="http://localhost/build/images/logo_rssm.png" alt="logo_rssm" height="40">
+                    </span>
+                </a>
+
+                <a href="index" class="logo logo-light">
+                    <span class="logo-sm">
+                        <img src="http://localhost/build/images/logo.png" alt="logo-sm-light" height="22">
+                    </span>
+                    <span class="logo-lg">
+                        <img src="http://localhost/build/images/logo_rssm.png" alt="logo-light" height="40">
+                    </span>
+                </a>
+            </div>
+
+            <button type="button" class="btn btn-sm px-3 font-size-24 header-item waves-effect" id="vertical-menu-btn">
+                <i class="ri-menu-2-line align-middle"></i>
+            </button>
+
+
+        </div>
+
+        <div class="d-flex">
+
+
+
+            <div class="dropdown d-none d-sm-inline-block">
+                <button type="button" class="btn header-item waves-effect"
+                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img class="" src="http://localhost/build/images/flags/us.jpg" alt="Header Language" height="16">
+                </button>
+                <div class="dropdown-menu dropdown-menu-end">
+                    
+                    <!-- item-->
+                    <a href="javascript:void(0);" class="dropdown-item notify-item">
+                        <img src="http://localhost/build/images/flags/spain.jpg" alt="user-image" class="me-1" height="12"> <span class="align-middle">Spanish</span>
+                    </a>
+
+                    <!-- item-->
+                    <a href="javascript:void(0);" class="dropdown-item notify-item">
+                        <img src="http://localhost/build/images/flags/germany.jpg" alt="user-image" class="me-1" height="12"> <span class="align-middle">German</span>
+                    </a>
+
+                    <!-- item-->
+                    <a href="javascript:void(0);" class="dropdown-item notify-item">
+                        <img src="http://localhost/build/images/flags/italy.jpg" alt="user-image" class="me-1" height="12"> <span class="align-middle">Italian</span>
+                    </a>
+
+                    <!-- item-->
+                    <a href="javascript:void(0);" class="dropdown-item notify-item">
+                        <img src="http://localhost/build/images/flags/russia.jpg" alt="user-image" class="me-1" height="12"> <span class="align-middle">Russian</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="dropdown d-none d-lg-inline-block ms-1">
+                <button type="button" class="btn header-item noti-icon waves-effect" data-toggle="fullscreen">
+                    <i class="ri-fullscreen-line"></i>
+                </button>
+            </div>
+
+            <div class="dropdown d-inline-block">
+                <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-notifications-dropdown"
+                      data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="ri-notification-3-line"></i>
+                    <span class="noti-dot"></span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
+                    aria-labelledby="page-header-notifications-dropdown">
+                    <div class="p-3">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h6 class="m-0"> Notifications </h6>
+                            </div>
+                            <div class="col-auto">
+                                <a href="#!" class="small"> View All</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-simplebar style="max-height: 230px;">
+                        <a href="" class="text-reset notification-item">
+                            <div class="d-flex">
+                                <div class="avatar-xs me-3">
+                                    <span class="avatar-title bg-primary rounded-circle font-size-16">
+                                        <i class="ri-shopping-cart-line"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-1">
+                                    <h6 class="mb-1">Your order is placed</h6>
+                                    <div class="font-size-12 text-muted">
+                                        <p class="mb-1">If several languages coalesce the grammar</p>
+                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> 3 min ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="" class="text-reset notification-item">
+                            <div class="d-flex">
+                                <img src="http://localhost/build/images/users/avatar-3.jpg"
+                                    class="me-3 rounded-circle avatar-xs" alt="user-pic">
+                                <div class="flex-1">
+                                    <h6 class="mb-1">James Lemire</h6>
+                                    <div class="font-size-12 text-muted">
+                                        <p class="mb-1">It will seem like simplified English.</p>
+                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> 1 hours ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="" class="text-reset notification-item">
+                            <div class="d-flex">
+                                <div class="avatar-xs me-3">
+                                    <span class="avatar-title bg-success rounded-circle font-size-16">
+                                        <i class="ri-checkbox-circle-line"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-1">
+                                    <h6 class="mb-1">Your item is shipped</h6>
+                                    <div class="font-size-12 text-muted">
+                                        <p class="mb-1">If several languages coalesce the grammar</p>
+                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> 3 min ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <a href="" class="text-reset notification-item">
+                            <div class="d-flex">
+                                <img src="http://localhost/build/images/users/avatar-4.jpg"
+                                    class="me-3 rounded-circle avatar-xs" alt="user-pic">
+                                <div class="flex-1">
+                                    <h6 class="mb-1">Salena Layfield</h6>
+                                    <div class="font-size-12 text-muted">
+                                        <p class="mb-1">As a skeptical Cambridge friend of mine occidental.</p>
+                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> 1 hours ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="p-2 border-top">
+                        <div class="d-grid">
+                            <a class="btn btn-sm btn-link font-size-14 text-center" href="javascript:void(0)">
+                                <i class="mdi mdi-arrow-right-circle me-1"></i> View More..
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown d-inline-block user-dropdown">
+                <button type="button" class="btn header-item waves-effect profile-trigger" id="page-header-user-dropdown"
+                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img class="rounded-circle header-profile-user" src="http://localhost/build/images/users/avatar-2.jpg"
+                        alt="Header Avatar">
+                    <span class="d-none d-xl-inline-block ms-1">
+                        Admin
+                                                    <span class="badge bg-warning text-dark ms-1" title="Akun pending aktivasi">
+                                <i class="ri-time-line"></i> Pending
+                            </span>
+                                            </span>
+                    <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-profile">
+                    <div class="profile-dropdown-header p-3 text-white">
+                        <div class="d-flex align-items-center">
+                            <img src="http://localhost/build/images/users/avatar-2.jpg" class="rounded-circle avatar-sm border border-white me-2"
+                                alt="Admin">
+                            <div>
+                                <h6 class="mb-1">Admin</h6>
+                                <p class="mb-0 text-white-75">admin@themesdesign.com</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-between align-items-center">
+                            <span class="badge bg-light text-dark">Pending</span>
+                            <small class="text-white-75">
+                                                                    User
+                                                            </small>
+                        </div>
+                    </div>
+                    <a href="http://localhost/profile" class="dropdown-item d-flex align-items-center">
+                        <i class="ri-user-line align-middle me-2"></i>
+                        <span>Edit Profil</span>
+                        <span class="badge bg-primary ms-auto">Baru</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button type="button" class="dropdown-item text-danger w-100 text-start logout-action" id="btn-logout"
+                        onclick="handleLogout(event)">
+                        <i class="ri-shut-down-line align-middle me-2"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hidden Logout Form -->
+            <form id="logout-form" action="http://localhost/logout" method="POST" class="d-none">
+                <input type="hidden" name="_token" value="" autocomplete="off">            </form>
+
+            <div class="dropdown d-inline-block">
+                <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect">
+                    <i class="ri-settings-2-line"></i>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+</header>
+
+<style>
+    .profile-trigger {
+        border-radius: 50px;
+        padding: 0.55rem 0.85rem;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .profile-trigger:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-profile-user {
+        object-fit: cover;
+    }
+
+    .dropdown-menu-profile {
+        min-width: 300px;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+        border: 0;
+    }
+
+    .profile-dropdown-header {
+        background: linear-gradient(135deg, rgba(91, 33, 182, 0.95), rgba(103, 58, 183, 0.92));
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .profile-dropdown-header .avatar-sm {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+    }
+
+    .dropdown-menu-profile .dropdown-item {
+        padding: 0.85rem 1.2rem;
+        color: #4b4f58;
+        transition: background-color .2s ease, transform .2s ease;
+    }
+
+    .dropdown-menu-profile .dropdown-item:hover,
+    .dropdown-menu-profile .dropdown-item.logout-action:hover {
+        background-color: rgba(103, 58, 183, 0.08);
+        transform: translateX(4px);
+    }
+
+    .dropdown-menu-profile .dropdown-divider {
+        margin: 0.5rem 0;
+        border-top-color: rgba(17, 24, 39, 0.08);
+    }
+
+    .dropdown-menu-profile .badge {
+        font-size: 0.65rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        padding: 0.4em 0.55em;
+    }
+
+    .profile-dropdown-header h6 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 0.125rem;
+    }
+
+    .profile-dropdown-header p {
+        font-size: 0.78rem;
+        opacity: 0.92;
+    }
+
+    .profile-dropdown-header small {
+        font-size: 0.75rem;
+    }
+</style>        <!-- ========== Left Sidebar Start ========== -->
+<div class="vertical-menu">
+
+    <div data-simplebar class="h-100">
+
+        <!--- Sidemenu -->
+        <div id="sidebar-menu">
+            <!-- Left Menu Start -->
+            <ul class="metismenu list-unstyled" id="side-menu">
+                <li class="menu-title">Utama</li>
+
+                <li>
+                    <a href="index" class="waves-effect">
+                        <i class="ri-dashboard-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                
+                <li class="menu-title">Aktivitas PPDS</li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="ri-book-read-line"></i>
+                        <span>Logbook</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="http://localhost/daily-activities">Kegiatan Harian</a></li>
+                        <li><a href="http://localhost/ppds/soap-logs">Laporan SOAP</a></li>
+                        <li><a href="#">Tindakan Medis</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="http://localhost/attendance" class="waves-effect">
+                        <i class="ri-fingerprint-line"></i>
+                        <span>Absensi</span>
+                    </a>
+                </li>
+
+                <li class="menu-title">Aplikasi Tambahan</li>
+
+                <li>
+                    <a href="calendar" class="waves-effect">
+                        <i class="ri-calendar-2-line"></i>
+                        <span>Kalender</span>
+                    </a>
+                </li>
+
+                
+                
+                
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="ri-layout-3-line"></i>
+                        <span>Layouts</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="true">
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">Vertical</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                <li><a href="layouts-light-sidebar">Light Sidebar</a></li>
+                                <li><a href="layouts-compact-sidebar">Compact Sidebar</a></li>
+                                <li><a href="layouts-icon-sidebar">Icon Sidebar</a></li>
+                                <li><a href="layouts-boxed">Boxed Layout</a></li>
+                                <li><a href="layouts-preloader">Preloader</a></li>
+                                <li><a href="layouts-colored-sidebar">Colored Sidebar</a></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="javascript: void(0);" class="has-arrow">Horizontal</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                <li><a href="layouts-horizontal">Horizontal</a></li>
+                                <li><a href="layouts-hori-topbar-light">Topbar light</a></li>
+                                <li><a href="layouts-hori-boxed-width">Boxed width</a></li>
+                                <li><a href="layouts-hori-preloader">Preloader</a></li>
+                                <li><a href="layouts-hori-colored-header">Colored Header</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu-title">Pages</li>
+
+                <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="ri-account-circle-line"></i>
+                        <span>Authentication</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="auth-login">Login</a></li>
+                        <li><a href="auth-register">Register</a></li>
+                        <li><a href="auth-recoverpw">Recover Password</a></li>
+                        <li><a href="auth-lock-screen">Lock Screen</a></li>
+                    </ul>
+                </li>
+
+                <!-- Utility menu removed per user request -->
+
+            </ul>
+        </div>
+        <!-- Sidebar -->
+    </div>
+</div>
+<!-- Left Sidebar End -->        <div class="main-content">
+            <div class="page-content">
+                <div class="container-fluid">
+                    
+                                                                
+                    <div class="row">
+    <div class="col-xl-10 mx-auto">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white pt-4 pb-3">
+                <h4 class="card-title mb-0 text-white"><i class="ri-add-circle-line align-middle me-2"></i>FORM SOAP</h4>
+                <p class="card-title-desc text-white-50 mb-0 mt-1">Lengkapi form rekam medis di bawah ini dengan seksama.</p>
+            </div>
+            <div class="card-body p-4">
+                <form id="soap_log_form" action="http://localhost/ppds/soap-logs" method="POST" novalidate>
+                    <input type="hidden" name="_token" value="" autocomplete="off">
 <!-- DATA PASIEN & KUNJUNGAN -->
 <div class="card border border-light bg-light shadow-none mb-4">
     <div class="card-body">
@@ -14,7 +453,7 @@
                         type="text" 
                         name="patient_search" 
                         id="patient_search" 
-                        class="form-control form-control-lg @error('patient_id') is-invalid @enderror" 
+                        class="form-control form-control-lg " 
                         placeholder="Ketik nomor registrasi atau nama pasien..." 
                         autocomplete="off"
                         required>
@@ -23,17 +462,14 @@
                     <!-- Patient suggestions akan ditampilkan di sini -->
                 </div>
             </div>
-            @error('patient_id')
-                <div class="invalid-feedback d-block">{{ $message }}</div>
-            @enderror
-            <small class="form-text text-muted mt-2"><i class="ri-information-line me-1"></i>Data ditarik otomatis dan terintegrasi secara *real-time* dari server Medinfras.</small>
+                        <small class="form-text text-muted mt-2"><i class="ri-information-line me-1"></i>Data ditarik otomatis dan terintegrasi secara *real-time* dari server Medinfras.</small>
         </div>
 
         <!-- Hidden field untuk menyimpan data pasien -->
-        <input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id', $log->patient_id ?? '') }}">
-        <input type="hidden" name="patient_name_manual" id="patient_name_manual" value="{{ old('patient_name_manual', $log->patient_name_manual ?? '') }}">
-        <input type="hidden" name="patient_registration_no" id="patient_registration_no" value="{{ old('patient_registration_no', $log->patient_registration_no ?? '') }}">
-        <input type="hidden" name="medical_record_no" id="medical_record_no" value="{{ old('medical_record_no', $log->medical_record_no ?? '') }}">
+        <input type="hidden" name="patient_id" id="patient_id" value="">
+        <input type="hidden" name="patient_name_manual" id="patient_name_manual" value="">
+        <input type="hidden" name="patient_registration_no" id="patient_registration_no" value="">
+        <input type="hidden" name="medical_record_no" id="medical_record_no" value="">
 
         <!-- Display patient information jika sudah dipilih -->
         <div id="patient_info_display" style="display:none;" class="alert alert-info border-0 shadow-sm mb-4">
@@ -44,7 +480,7 @@
 
         <div class="mb-2">
             <label for="visit_date" class="form-label fw-bold text-muted"><i class="ri-calendar-event-line text-primary me-1"></i> Tanggal Visit</label>
-            <input type="datetime-local" class="form-control form-control-lg bg-white" name="visit_date" id="visit_date" value="{{ old('visit_date', isset($log->visit_date) ? $log->visit_date->format('Y-m-d\TH:i') : '') }}">
+            <input type="datetime-local" class="form-control form-control-lg bg-white" name="visit_date" id="visit_date" value="">
         </div>
     </div>
 </div>
@@ -62,26 +498,26 @@
                     <i class="ri-search-line me-1"></i> Cari Diagnosa
                 </button>
             </div>
-            <input type="hidden" name="diagnosa_id" id="diagnosa_id" value="{{ old('diagnosa_id', $log->diagnosa_id ?? '') }}">
+            <input type="hidden" name="diagnosa_id" id="diagnosa_id" value="">
             <small class="form-text text-muted mt-2">Diagnosa sesuai standar ICD-10 Medinfras</small>
         </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold text-muted">S - Subjective</label>
-                <textarea class="form-control" name="subjective" rows="4" placeholder="Keluhan utama pasien yang dirasakan...">{{ old('subjective', $log->subjective ?? '') }}</textarea>
+                <textarea class="form-control" name="subjective" rows="4" placeholder="Keluhan utama pasien yang dirasakan..."></textarea>
             </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold text-muted">O - Objective</label>
-                <textarea class="form-control" name="objective" rows="4" placeholder="Hasil pemeriksaan fisik, lab, dan penunjang...">{{ old('objective', $log->objective ?? '') }}</textarea>
+                <textarea class="form-control" name="objective" rows="4" placeholder="Hasil pemeriksaan fisik, lab, dan penunjang..."></textarea>
             </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold text-muted">A - Assessment</label>
-                <textarea class="form-control" name="assessment" rows="4" placeholder="Penilaian medis / Kesimpulan diagnosis...">{{ old('assessment', $log->assessment ?? '') }}</textarea>
+                <textarea class="form-control" name="assessment" rows="4" placeholder="Penilaian medis / Kesimpulan diagnosis..."></textarea>
             </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold text-muted">P - Plan</label>
-                <textarea class="form-control" name="plan" rows="4" placeholder="Rencana pengobatan, terapi, atau tindakan...">{{ old('plan', $log->plan ?? '') }}</textarea>
+                <textarea class="form-control" name="plan" rows="4" placeholder="Rencana pengobatan, terapi, atau tindakan..."></textarea>
             </div>
         </div>
     </div>
@@ -101,7 +537,7 @@
                         type="text" 
                         name="nama_dpjp" 
                         id="nama_dpjp" 
-                        class="form-control form-control-lg @error('nama_dpjp') is-invalid @enderror" 
+                        class="form-control form-control-lg " 
                         placeholder="Ketik nama dokter untuk mencari..." 
                         autocomplete="off"
                         required>
@@ -110,10 +546,7 @@
                     <!-- Suggestions akan ditampilkan di sini -->
                 </div>
             </div>
-            @error('nama_dpjp')
-                <div class="invalid-feedback d-block">{{ $message }}</div>
-            @enderror
-        </div>
+                    </div>
     </div>
 </div>
 
@@ -156,8 +589,131 @@
     </div>
 </div>
 
-@push('scripts')
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <a href="http://localhost/ppds/soap-logs" class="btn btn-light btn-lg waves-effect me-3">
+                            <i class="ri-arrow-go-back-line align-middle me-1"></i> Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg waves-effect waves-light">
+                            <i class="ri-save-line align-middle me-1"></i> Simpan SOAP Log
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+                </div>
+            </div>
+            <footer class="footer">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                2026 © RSSM.
+            </div>
+            <div class="col-sm-6">
+                <div class="text-sm-end d-none d-sm-block">
+                    Dibuat dengan <i class="mdi mdi-heart text-danger"></i> oleh simrs
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>        </div>
+
+    </div>
+
+    <!-- Right Sidebar -->
+<div class="right-bar">
+    <div data-simplebar class="h-100">
+        <div class="rightbar-title d-flex align-items-center px-3 py-4">
+            
+            <h5 class="m-0 me-2">Settings</h5>
+
+            <a href="javascript:void(0);" class="right-bar-toggle ms-auto">
+                <i class="mdi mdi-close noti-icon"></i>
+            </a>
+        </div>
+
+        <!-- Settings -->
+        <hr class="mt-0" />
+        <h6 class="text-center mb-0">Choose Layouts</h6>
+
+        <div class="p-4">
+            <div class="mb-2">
+                <img src="http://localhost/build/images/layouts/layout-1.jpg" class="img-fluid img-thumbnail" alt="layout-1">
+            </div>
+
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input theme-choice" type="checkbox" id="light-mode-switch" checked>
+                <label class="form-check-label" for="light-mode-switch">Light Mode</label>
+            </div>
+    
+            <div class="mb-2">
+                <img src="http://localhost/build/images/layouts/layout-2.jpg" class="img-fluid img-thumbnail" alt="layout-2">
+            </div>
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input theme-choice" type="checkbox" id="dark-mode-switch" data-bsStyle="assets/css/bootstrap-dark.min.css" data-appStyle="assets/css/app-dark.min.css">
+                <label class="form-check-label" for="dark-mode-switch">Dark Mode</label>
+            </div>
+    
+            <div class="mb-2">
+                <img src="http://localhost/build/images/layouts/layout-3.jpg" class="img-fluid img-thumbnail" alt="layout-3">
+            </div>
+            <div class="form-check form-switch mb-5">
+                <input class="form-check-input theme-choice" type="checkbox" id="rtl-mode-switch" data-appStyle="assets/css/app-rtl.min.css">
+                <label class="form-check-label" for="rtl-mode-switch">RTL Mode</label>
+            </div>
+
+            
+        </div>
+
+    </div> <!-- end slimscroll-menu-->
+</div>
+<!-- /Right-bar -->
+
+<!-- Right bar overlay-->
+<div class="rightbar-overlay"></div>    <!-- JAVASCRIPT -->
+<script src="http://localhost/build/libs/jquery/jquery.min.js"></script>
+<script src="http://localhost/build/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="http://localhost/build/libs/metismenu/metisMenu.min.js"></script>
+<script src="http://localhost/build/libs/simplebar/simplebar.min.js"></script>
+<script src="http://localhost/build/libs/node-waves/waves.min.js"></script>
+        <!-- ... file-file JavaScript lainnya ... -->
+
+    <!-- Sweet Alerts js -->
+    <script src="http://localhost/build/libs/sweetalert2/sweetalert2.min.js"></script>
+
+    <!-- Logout Confirmation Handler -->
+    <script>
+        function handleLogout(event) {
+            event.preventDefault();
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Logout?',
+                text: 'Apakah Anda yakin ingin keluar dari aplikasi?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Logout',
+                cancelButtonText: 'Batal',
+                allowOutsideClick: false,
+                didOpen: function() {
+                    // Ensure the cancel button is focused
+                    Swal.getCancelButton().focus();
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the hidden logout form
+                    document.getElementById('logout-form').submit();
+                }
+            });
+        }
+    </script>
+
+    <!-- Ini adalah tempat script dari halaman lain akan dimasukkan -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script>
     (function() {
         function initSoapFormValidation() {
@@ -359,7 +915,7 @@
         const dokterInput = document.getElementById('nama_dpjp');
         const dokterSuggestions = document.getElementById('dokter_suggestions');
         let allDokters = [];
-        const oldValue = "{{ old('nama_dpjp', $log->nama_dpjp ?? '') }}";
+        const oldValue = "";
 
         // Load dokter dari API
         async function loadDokters() {
@@ -932,4 +1488,24 @@
     }
 })();
 </script>
-@endpush
+    
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- App js -->
+    <script src="http://localhost/build/js/app.js"></script>
+    <script>
+        window.addEventListener('pageshow', function(event) {
+            var navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+            var isBackForward = Array.isArray(navEntries) && navEntries.some(function(entry) {
+                return entry.type === 'back_forward';
+            });
+
+            if (event.persisted || isBackForward) {
+                window.location.reload();
+            }
+        });
+    </script> 
+</body>
+</html>
+
+</body>
+</html>
