@@ -18,16 +18,20 @@ class UserController extends Controller
     public function index()
     {
         // Ambil semua user kecuali user yang sedang login, agar tidak bisa mengubah role diri sendiri
-        $users = User::where('id', '!=', Auth::id())->paginate(10);
+        $users = User::where('id', '!=', Auth::id())->orderBy('id')->paginate(10);
         
         // Ambil semua konstanta role dari model User
         $roles = [
             User::ROLE_SUPERADMIN,
             User::ROLE_ADMIN,
             User::ROLE_USER,
+            User::ROLE_KONSULEN,
         ];
 
-        return view('admin.users.index', compact('users', 'roles'));
+        // Ambil semua user dengan role konsulen untuk pilihan DPJP
+        $supervisors = User::where('role', User::ROLE_KONSULEN)->orderBy('name')->get();
+
+        return view('admin.users.index', compact('users', 'roles', 'supervisors'));
     }
 
     /**
@@ -41,7 +45,7 @@ class UserController extends Controller
     {
         // Validasi input
         $request->validate([
-            'role' => ['required', Rule::in([User::ROLE_SUPERADMIN, User::ROLE_ADMIN, User::ROLE_USER])],
+            'role' => ['required', Rule::in([User::ROLE_SUPERADMIN, User::ROLE_ADMIN, User::ROLE_USER, User::ROLE_KONSULEN])],
         ]);
 
         // Larangan: Admin tidak boleh mengubah role Superadmin
@@ -118,6 +122,21 @@ class UserController extends Controller
         $user->save();
 
         return back()->with('success', 'Target hari check-in pengguna berhasil diperbarui.');
+    }
+
+    /**
+     * Update assigned supervisor (DPJP) for a user.
+     */
+    public function updateSupervisor(Request $request, User $user)
+    {
+        $request->validate([
+            'supervisor_id' => ['nullable', 'exists:users,id'],
+        ]);
+
+        $user->supervisor_id = $request->supervisor_id;
+        $user->save();
+
+        return back()->with('success', 'Supervisor/DPJP pengguna berhasil diperbarui.');
     }
 
     /**

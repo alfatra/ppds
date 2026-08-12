@@ -34,6 +34,7 @@
                                     <th>Nama</th>
                                     <th>Email</th>
                                     <th>Role</th>
+                                    <th>DPJP / Konsulen</th>
                                     <th>Status</th>
                                     <th>Target Check-In</th>
                                     <th style="width: 100px;">Aksi</th>
@@ -56,6 +57,24 @@
                                                     @endforeach
                                                 </select>
                                             </form>
+                                        </td>
+                                        <td>
+                                            @if($user->isUser())
+                                                <form action="{{ route('admin.users.updateSupervisor', $user->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <select name="supervisor_id" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 150px;">
+                                                        <option value="">-- Pilih DPJP --</option>
+                                                        @foreach ($supervisors as $supervisor)
+                                                            <option value="{{ $supervisor->id }}" {{ $user->supervisor_id == $supervisor->id ? 'selected' : '' }}>
+                                                                {{ $supervisor->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </form>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                         <td>
                                             <form action="{{ route('admin.users.activate', $user->id) }}" method="POST" class="d-inline">

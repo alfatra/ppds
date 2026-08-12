@@ -47,6 +47,31 @@
         .patient-info th {
             width: 150px;
         }
+        .ttv-table-container {
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+        .ttv-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 2px 0;
+            text-align: center;
+        }
+        .ttv-table th {
+            background-color: #888;
+            color: #fff;
+            font-style: italic;
+            padding: 4px;
+            font-weight: normal;
+            font-size: 11px;
+        }
+        .ttv-table td {
+            border: 1px solid #aaa;
+            padding: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            background-color: #fff;
+        }
         .soap-section {
             margin-bottom: 15px;
         }
@@ -123,6 +148,29 @@
             </table>
         </div>
 
+        @if($log->ttv_td || $log->ttv_hr || $log->ttv_rr || $log->ttv_temp || $log->ttv_spo2 || $log->ttv_vas)
+        <div class="ttv-table-container">
+            <table class="ttv-table">
+                <tr>
+                    <th>TD</th>
+                    <th>HR</th>
+                    <th>RR</th>
+                    <th>TEMP</th>
+                    <th>SpO2</th>
+                    <th>VAS</th>
+                </tr>
+                <tr>
+                    <td>{{ $log->ttv_td ?? '-' }}</td>
+                    <td>{{ $log->ttv_hr ?? '-' }}</td>
+                    <td>{{ $log->ttv_rr ?? '-' }}</td>
+                    <td>{{ $log->ttv_temp ?? '-' }}</td>
+                    <td>{{ $log->ttv_spo2 ?? '-' }}</td>
+                    <td>{{ $log->ttv_vas ?? '-' }}</td>
+                </tr>
+            </table>
+        </div>
+        @endif
+
         <div class="soap-section">
             <h3>S (Subjective)</h3>
             <div class="content">{{ $log->subjective }}</div>
@@ -130,7 +178,9 @@
 
         <div class="soap-section">
             <h3>O (Objective)</h3>
-            <div class="content">{{ $log->objective }}</div>
+            <div class="content">
+                {{ $log->objective }}
+            </div>
         </div>
 
         <div class="soap-section">
@@ -142,6 +192,21 @@
             <h3>P (Plan)</h3>
             <div class="content">{{ $log->plan }}</div>
         </div>
+
+        @if(!empty($log->foto_visite))
+        <div class="soap-section" style="page-break-inside: avoid;">
+            <h3>Foto Hasil Visite</h3>
+            <div class="content" style="text-align: center; white-space: normal; padding: 15px;">
+                @if(is_array($log->foto_visite))
+                    @foreach($log->foto_visite as $foto)
+                        <img src="{{ public_path('storage/' . $foto) }}" alt="Foto Visite" style="height: 250px; width: auto; max-width: 100%; margin: 5px; border: 1px solid #ddd; padding: 3px; display: inline-block; vertical-align: top;">
+                    @endforeach
+                @else
+                    <img src="{{ public_path('storage/' . $log->foto_visite) }}" alt="Foto Visite" style="height: 250px; width: auto; max-width: 100%; margin: 5px; border: 1px solid #ddd; padding: 3px; display: inline-block; vertical-align: top;">
+                @endif
+            </div>
+        </div>
+        @endif
 
         <div class="footer">
             <div class="printed-date">

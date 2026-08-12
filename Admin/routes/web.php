@@ -51,6 +51,7 @@ Route::middleware(['auth', 'role:superadmin,admin'])->prefix('admin')->name('adm
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::patch('/users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
     Route::patch('/users/{user}/update-role', [UserController::class, 'updateRole'])->name('users.updateRole');
+    Route::patch('/users/{user}/update-supervisor', [UserController::class, 'updateSupervisor'])->name('users.updateSupervisor');
     Route::patch('/users/{user}/update-attendance', [UserController::class, 'updateAttendance'])->name('users.updateAttendance');
     Route::patch('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
@@ -79,6 +80,22 @@ Route::middleware(['auth', 'role:superadmin,admin'])->prefix('admin')->name('adm
 Route::resource('daily-activities', \App\Http\Controllers\DailyActivityController::class)->middleware('auth');
     
 Route::get('/index', [DashboardController::class, 'index'])->middleware('auth')->name('index');
+
+// Group Rute untuk Konsulen
+Route::middleware(['auth', 'role:konsulen,superadmin,admin'])->prefix('konsulen')->name('konsulen.')->group(function () {
+    Route::get('/mahasiswa', [App\Http\Controllers\KonsulenController::class, 'mahasiswa'])->name('mahasiswa');
+});
+
+// Group Rute untuk Konsulen Approval
+Route::middleware(['auth', 'role:konsulen,superadmin,admin'])->prefix('approvals')->name('approvals.')->group(function () {
+    Route::get('/', [App\Http\Controllers\ApprovalController::class, 'index'])->name('index');
+    Route::patch('/daily-activity/{id}/approve', [App\Http\Controllers\ApprovalController::class, 'approveDailyActivity'])->name('daily-activity.approve');
+    Route::patch('/daily-activity/{id}/reject', [App\Http\Controllers\ApprovalController::class, 'rejectDailyActivity'])->name('daily-activity.reject');
+    Route::patch('/soap-log/{id}/approve', [App\Http\Controllers\ApprovalController::class, 'approveSoapLog'])->name('soap-log.approve');
+    Route::patch('/soap-log/{id}/reject', [App\Http\Controllers\ApprovalController::class, 'rejectSoapLog'])->name('soap-log.reject');
+});
+
 Route::get('{any}', [App\Http\Controllers\HomeController::class, 'index']);
 
 Route::get('/debug-create', function() { return view('soap_logs.create'); });
+

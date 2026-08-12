@@ -32,6 +32,23 @@
                 </li>
                 @endif
 
+                @if(in_array(Auth::user()->role, ['admin', 'superadmin', 'konsulen']))
+                <li class="menu-title">Supervisor</li>
+                <li>
+                    <a href="{{ route('konsulen.mahasiswa') }}" class="waves-effect">
+                        <i class="ri-team-line"></i>
+                        <span>Mahasiswa Bimbingan</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('approvals.index') }}" class="waves-effect">
+                        <i class="ri-check-double-line"></i>
+                        <span>Kotak Persetujuan</span>
+                    </a>
+                </li>
+                @endif
+
+                @if(!Auth::user()->isKonsulen())
                 <li class="menu-title">Aktivitas PPDS</li>
 
                 <li>
@@ -52,6 +69,7 @@
                         <span>Absensi</span>
                     </a>
                 </li>
+                @endif
 
 
 

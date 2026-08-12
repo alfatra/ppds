@@ -13,6 +13,9 @@ class DailyActivity extends Model
         'patient_name',
         'medical_record_no',
         'notes',
+        'supervisor_id',
+        'approval_status',
+        'supervisor_note',
     ];
 
     protected $casts = [
@@ -27,5 +30,10 @@ class DailyActivity extends Model
     public function medicalActivity()
     {
         return $this->belongsTo(MedicalActivity::class);
+    }
+
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
     }
 }

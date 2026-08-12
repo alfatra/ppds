@@ -23,7 +23,19 @@
                 <dd class="col-sm-9"><pre>{{ $log->subjective }}</pre></dd>
 
                 <dt class="col-sm-3">Objective</dt>
-                <dd class="col-sm-9"><pre>{{ $log->objective }}</pre></dd>
+                <dd class="col-sm-9">
+                    @if($log->ttv_td || $log->ttv_hr || $log->ttv_rr || $log->ttv_temp || $log->ttv_spo2 || $log->ttv_vas)
+                    <div class="mb-2">
+                        <span class="badge bg-light text-dark border me-1 mb-1">TD: {{ $log->ttv_td ?? '-' }}</span>
+                        <span class="badge bg-light text-dark border me-1 mb-1">HR: {{ $log->ttv_hr ?? '-' }}</span>
+                        <span class="badge bg-light text-dark border me-1 mb-1">RR: {{ $log->ttv_rr ?? '-' }}</span>
+                        <span class="badge bg-light text-dark border me-1 mb-1">Suhu: {{ $log->ttv_temp ?? '-' }}</span>
+                        <span class="badge bg-light text-dark border me-1 mb-1">SpO2: {{ $log->ttv_spo2 ?? '-' }}</span>
+                        <span class="badge bg-light text-dark border me-1 mb-1">VAS: {{ $log->ttv_vas ?? '-' }}</span>
+                    </div>
+                    @endif
+                    <pre>{{ $log->objective }}</pre>
+                </dd>
 
                 <dt class="col-sm-3">Assessment</dt>
                 <dd class="col-sm-9"><pre>{{ $log->assessment }}</pre></dd>

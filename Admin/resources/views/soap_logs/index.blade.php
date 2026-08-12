@@ -63,6 +63,7 @@
                                     <th>Subjective</th>
                                     <th>Diagnosa</th>
                                     <th>Diinput Oleh</th>
+                                    <th>Status</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -103,24 +104,44 @@
                                                 <span>{{ $log->creator->name ?? 'User Dihapus' }}</span>
                                             </div>
                                         </td>
+                                        <td>
+                                            @if($log->approval_status == 'pending')
+                                                <span class="badge bg-warning">Pending</span>
+                                            @elseif($log->approval_status == 'approved')
+                                                <span class="badge bg-success">Approved</span>
+                                            @else
+                                                <span class="badge bg-danger" title="{{ $log->supervisor_note }}">Rejected</span>
+                                            @endif
+                                        </td>
                                         <td class="text-center">
                                             <div class="btn-group" role="group">
                                                 <a href="{{ route('ppds.soap-logs.show',$log) }}" class="btn btn-outline-info btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="View">
                                                     <i class="mdi mdi-eye d-block d-sm-none"></i>
                                                     <span class="d-none d-sm-block">View</span>
                                                 </a>
-                                                <a href="{{ route('ppds.soap-logs.edit',$log) }}" class="btn btn-outline-warning btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
-                                                    <i class="mdi mdi-pencil d-block d-sm-none"></i>
-                                                    <span class="d-none d-sm-block">Edit</span>
-                                                </a>
-                                                <form action="{{ route('ppds.soap-logs.destroy',$log) }}" method="POST" style="display:inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus log ini?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-end" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
-                                                        <i class="mdi mdi-delete d-block d-sm-none"></i>
-                                                        <span class="d-none d-sm-block">Delete</span>
-                                                    </button>
-                                                </form>
+                                                @if($log->approval_status != 'approved' || auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
+                                                    @if($log->approval_status == 'rejected')
+                                                        <a href="{{ route('ppds.soap-logs.edit',$log) }}" class="btn btn-outline-danger btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Revisi">
+                                                            <i class="mdi mdi-pencil-alert d-block d-sm-none"></i>
+                                                            <span class="d-none d-sm-block">Revisi</span>
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('ppds.soap-logs.edit',$log) }}" class="btn btn-outline-warning btn-sm" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit">
+                                                            <i class="mdi mdi-pencil d-block d-sm-none"></i>
+                                                            <span class="d-none d-sm-block">Edit</span>
+                                                        </a>
+                                                    @endif
+                                                    <form action="{{ route('ppds.soap-logs.destroy',$log) }}" method="POST" style="display:inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus log ini?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-end" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete">
+                                                            <i class="mdi mdi-delete d-block d-sm-none"></i>
+                                                            <span class="d-none d-sm-block">Delete</span>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <button class="btn btn-outline-secondary btn-sm" disabled title="Terkunci"><i class="mdi mdi-lock"></i></button>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

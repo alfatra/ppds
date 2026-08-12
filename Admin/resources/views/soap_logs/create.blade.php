@@ -11,7 +11,7 @@
                 <p class="card-title-desc text-white-50 mb-0 mt-1">Lengkapi form rekam medis di bawah ini dengan seksama.</p>
             </div>
             <div class="card-body p-4">
-                <form id="soap_log_form" action="{{ route('ppds.soap-logs.store') }}" method="POST" novalidate>
+                <form id="soap_log_form" action="{{ route('ppds.soap-logs.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                     @include('soap_logs.form')
                     <hr class="my-4">
                     <div class="d-flex justify-content-end align-items-center">

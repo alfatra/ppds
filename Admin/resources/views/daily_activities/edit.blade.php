@@ -23,6 +23,15 @@
                 <h4 class="card-title mb-0 text-white"><i class="ri-edit-circle-line align-middle me-2"></i>Edit Kegiatan Harian</h4>
                 <p class="card-title-desc text-white-50 mb-0 mt-1">Silakan perbarui data di bawah ini jika ada kesalahan pencatatan.</p>
             </div>
+            
+            @if($dailyActivity->approval_status == 'rejected')
+                <div class="alert alert-danger m-4 mb-0">
+                    <strong>Pemberitahuan:</strong> Laporan ini ditolak oleh supervisor dengan catatan: <br>
+                    <em>"{{ $dailyActivity->supervisor_note }}"</em><br>
+                    Silakan perbaiki data di bawah dan simpan kembali.
+                </div>
+            @endif
+
             <div class="card-body p-4">
                 <form action="{{ route('daily-activities.update', $dailyActivity->id) }}" method="POST">
                     @csrf
@@ -104,6 +113,14 @@
                         @enderror
                     </div>
 
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="ri-user-star-line text-info me-1"></i> Supervisor / DPJP Utama</label>
+                        <div class="p-3 bg-light rounded border">
+                            <h5 class="mb-1 text-info">{{ Auth::user()->supervisor ? Auth::user()->supervisor->name : 'Belum Ditentukan' }}</h5>
+                            <small class="text-muted">Laporan ini akan dikirimkan kembali ke DPJP Anda untuk diverifikasi.</small>
+                        </div>
+                    </div>
+
                     <hr class="my-4">
 
                     <div class="d-flex justify-content-end align-items-center">
@@ -111,7 +128,7 @@
                             <i class="ri-arrow-go-back-line align-middle me-1"></i> Batal
                         </a>
                         <button type="submit" class="btn btn-info btn-lg waves-effect waves-light text-white">
-                            <i class="ri-save-line align-middle me-1"></i> Perbarui Data
+                            <i class="ri-save-line align-middle me-1"></i> {{ $dailyActivity->approval_status == 'rejected' ? 'Kirim Ulang Revisi' : 'Perbarui Data' }}
                         </button>
                     </div>
                 </form>
@@ -254,5 +271,14 @@
             }
         });
     })();
+
+    // Inisialisasi Select2 untuk dropdown Tindakan Medis
+    $(document).ready(function() {
+        $('select[name="medical_activity_id"]').select2({
+            placeholder: "-- Pilih Tindakan Medis --",
+            allowClear: true,
+            width: '100%'
+        });
+    });
 </script>
 @endpush

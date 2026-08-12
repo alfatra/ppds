@@ -24,11 +24,13 @@ class User extends Authenticatable
         'role',
         'is_active',
         'attendance_target',
+        'supervisor_id',
     ];
 
     const ROLE_SUPERADMIN = 'superadmin';
     const ROLE_ADMIN = 'admin';
     const ROLE_USER = 'user';
+    const ROLE_KONSULEN = 'konsulen';
 
     /**
      * The attributes that should be hidden for serialization.
@@ -72,6 +74,11 @@ class User extends Authenticatable
         return $this->role === self::ROLE_USER;
     }
 
+    public function isKonsulen(): bool
+    {
+        return $this->role === self::ROLE_KONSULEN;
+    }
+
     /**
      * Check if the user has management privileges (admin or superadmin).
      *
@@ -109,5 +116,13 @@ class User extends Authenticatable
             return \Illuminate\Support\Facades\Storage::url($this->ppds->foto_profil);
         }
         return \Illuminate\Support\Facades\URL::asset('build/images/users/avatar-2.jpg');
+    }
+
+    /**
+     * Get the supervisor (Konsulen) assigned to this user.
+     */
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
     }
 }

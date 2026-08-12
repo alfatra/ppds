@@ -23,7 +23,7 @@
                                             </div>
 
                                             <h4 class="font-size-18 mt-4">Reset Password</h4>
-                                            <p class="text-muted">Reset your password to Nazox.</p>
+                                            <p class="text-muted">Reset your password to SIMRS.</p>
                                         </div>
 
                                         <div class="p-2 mt-5">
@@ -57,7 +57,7 @@
                                         <div class="mt-5 text-center">
                                             <p>Don't have an account ? <a href="{{ route('register') }}"
                                                     class="fw-medium text-primary"> Sign Up </a> </p>
-                                            <p>© {{ date('Y') }} Nazox. Crafted with <i
+                                            <p>© {{ date('Y') }} SIMRS. Crafted with <i
                                                     class="mdi mdi-heart text-danger"></i> by Themesdesign</p>
                                         </div>
                                     </div>

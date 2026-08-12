@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 use App\Models\DailyActivity;
 use App\Models\MedicalActivity;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class DailyActivityController extends Controller
@@ -41,7 +42,10 @@ class DailyActivityController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        DailyActivity::create(array_merge($request->all(), ['user_id' => Auth::id()]));
+        DailyActivity::create(array_merge($request->all(), [
+            'user_id' => Auth::id(),
+            'supervisor_id' => Auth::user()->supervisor_id
+        ]));
 
         return redirect()->route('daily-activities.index')->with('success', 'Kegiatan Harian berhasil ditambahkan.');
     }
@@ -51,6 +55,10 @@ class DailyActivityController extends Controller
         // Ensure user can only edit their own, unless admin
         if (!in_array(Auth::user()->role, ['admin', 'superadmin']) && $dailyActivity->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
+        }
+
+        if ($dailyActivity->approval_status === 'approved' && !in_array(Auth::user()->role, ['admin', 'superadmin'])) {
+            abort(403, 'Tidak dapat mengedit data yang sudah disetujui.');
         }
 
         $medicalActivities = MedicalActivity::all();
@@ -63,6 +71,10 @@ class DailyActivityController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        if ($dailyActivity->approval_status === 'approved' && !in_array(Auth::user()->role, ['admin', 'superadmin'])) {
+            abort(403, 'Tidak dapat mengedit data yang sudah disetujui.');
+        }
+
         $request->validate([
             'medical_activity_id' => 'required|exists:medical_activities,id',
             'activity_date' => 'required|date',
@@ -71,7 +83,17 @@ class DailyActivityController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $dailyActivity->update($request->all());
+        // Jika diedit dan status sebelumnya rejected, kembalikan ke pending
+        $data = $request->all();
+        // Paksa assign ke supervisor yang terhubung dengan user, atau gunakan yang sudah ada jika tidak ada
+        $data['supervisor_id'] = Auth::user()->supervisor_id ?: $dailyActivity->supervisor_id;
+        
+        if ($dailyActivity->approval_status === 'rejected') {
+            $data['approval_status'] = 'pending';
+            $data['supervisor_note'] = null; // Clear rejection note
+        }
+
+        $dailyActivity->update($data);
 
         return redirect()->route('daily-activities.index')->with('success', 'Kegiatan Harian berhasil diperbarui.');
     }
@@ -80,6 +102,10 @@ class DailyActivityController extends Controller
     {
         if (!in_array(Auth::user()->role, ['admin', 'superadmin']) && $dailyActivity->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
+        }
+
+        if ($dailyActivity->approval_status === 'approved' && !in_array(Auth::user()->role, ['admin', 'superadmin'])) {
+            abort(403, 'Tidak dapat menghapus data yang sudah disetujui.');
         }
 
         $dailyActivity->delete();

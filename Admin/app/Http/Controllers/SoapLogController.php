@@ -52,6 +52,7 @@ class SoapLogController extends Controller
         // Ambil data, urutkan dari yang terbaru, dan gunakan pagination
        $logs = $query->with('patient', 'doctor', 'creator', 'diagnosis')
               ->latest()
+              ->orderBy('id', 'desc')
               ->paginate(15)->withQueryString();
 
         // Menyisipkan nama diagnosa dari API ke dalam setiap item log
@@ -126,11 +127,20 @@ class SoapLogController extends Controller
             'medical_record_no' => 'nullable|string',
             'visit_date' => 'required|date',
             'nama_dpjp' => 'required|string|max:255',
+            'api_dpjp_id' => 'nullable|string',
             'subjective' => 'required|string',
             'objective' => 'required|string',
             'assessment' => 'required|string',
             'plan' => 'required|string',
+            'ttv_td' => 'nullable|string',
+            'ttv_hr' => 'nullable|string',
+            'ttv_rr' => 'nullable|string',
+            'ttv_temp' => 'nullable|string',
+            'ttv_spo2' => 'nullable|string',
+            'ttv_vas' => 'nullable|string',
             'diagnosa_id' => 'nullable|string',
+            'foto_visite' => 'nullable|array',
+            'foto_visite.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Process patient_id - could be integer or string (registration number)
@@ -158,6 +168,51 @@ class SoapLogController extends Controller
         $validatedData['created_by'] = Auth::id();
         // Asumsi dokter yang mengisi adalah user yang login
         $validatedData['doctor_id'] = Auth::id();
+        // Just-In-Time (JIT) Provisioning: Cari atau buat akun DPJP (Konsulen) otomatis
+        $namaDpjp = $validatedData['nama_dpjp'];
+        $apiDpjpId = $request->input('api_dpjp_id'); // Ambil kode dokter
+        
+        // Gunakan kode dokter sebagai email (atau slug nama jika kode tidak ada)
+        $emailPrefix = $apiDpjpId ? strtolower(trim($apiDpjpId)) : \Illuminate\Support\Str::slug($namaDpjp) . '_' . uniqid();
+        
+        // Coba cari berdasarkan nama yang persis sama terlebih dahulu untuk menghindari duplikasi
+        $dpjp = \App\Models\User::where('role', \App\Models\User::ROLE_KONSULEN)
+                    ->where('name', $namaDpjp)
+                    ->first();
+
+        if (!$dpjp) {
+            $dpjp = \App\Models\User::firstOrCreate(
+                ['email' => $emailPrefix . '@rs.local'], // Cari berdasarkan email (kode dokter) agar unik
+                [
+                    'name' => $namaDpjp,
+                    'password' => bcrypt('12345678'), // Password default 12345678 sesuai permintaan
+                    'role' => \App\Models\User::ROLE_KONSULEN,
+                    'is_active' => true,
+                ]
+            );
+
+        }
+
+        // Jika user sudah ada tapi namanya mungkin berubah di API, update namanya
+        if ($dpjp->name !== $namaDpjp) {
+            $dpjp->update(['name' => $namaDpjp]);
+        }
+
+        // Set supervisor_id ke ID dari DPJP yang baru saja dipilih/dibuat
+        $validatedData['supervisor_id'] = $dpjp->id;
+
+        // Opsi tambahan: Jika Anda ingin DPJP ini JUGA menjadi supervisor utama/default untuk profil PPDS ini seterusnya
+        // Anda bisa uncomment baris di bawah ini:
+        // $user->update(['supervisor_id' => $dpjp->id]);
+
+        // Handle file upload
+        if ($request->hasFile('foto_visite')) {
+            $paths = [];
+            foreach ($request->file('foto_visite') as $file) {
+                $paths[] = $file->store('soap_photos', 'public');
+            }
+            $validatedData['foto_visite'] = $paths;
+        }
 
         SoapLog::create($validatedData);
 
@@ -172,8 +227,8 @@ class SoapLogController extends Controller
     {
         $user = Auth::user();
 
-        // Hanya admin/superadmin atau pemilik data yang bisa melihat
-        if (!$user->isSuperAdmin() && !$user->isAdmin() && $log->created_by != $user->id) {
+        // Hanya admin/superadmin, pemilik data, atau supervisor yang bersangkutan yang bisa melihat
+        if (!$user->isSuperAdmin() && !$user->isAdmin() && $log->created_by != $user->id && $log->supervisor_id != $user->id) {
             // Jika tidak berhak, kembalikan error 403 (Forbidden)
             abort(403, 'ANDA TIDAK MEMILIKI AKSES UNTUK MELIHAT DATA INI.');
         }
@@ -258,9 +313,13 @@ class SoapLogController extends Controller
     public function edit(SoapLog $log)
     {
         $user = Auth::user();
-        // Hanya admin/superadmin atau pemilik data yang bisa mengedit
-        if (!$user->isSuperAdmin() && !$user->isAdmin() && $log->created_by != $user->id) {
+        // Hanya admin/superadmin, pemilik data, atau supervisor yang bersangkutan yang bisa mengedit
+        if (!$user->isSuperAdmin() && !$user->isAdmin() && $log->created_by != $user->id && $log->supervisor_id != $user->id) {
             abort(403, 'ANDA TIDAK MEMILIKI AKSES UNTUK MENGEDIT DATA INI.');
+        }
+
+        if ($log->approval_status === 'approved' && !$user->isSuperAdmin() && !$user->isAdmin()) {
+            abort(403, 'Tidak dapat mengedit data yang sudah disetujui.');
         }
 
         $dokters = $this->getDokterListFromApi();
@@ -275,9 +334,13 @@ class SoapLogController extends Controller
     public function update(Request $request, SoapLog $log)
     {
         $user = Auth::user();
-        // Cek otorisasi sebelum validasi
-        if (!$user->isSuperAdmin() && !$user->isAdmin() && $log->created_by != $user->id) {
+        // Cek otorisasi sebelum validasi (Admin, Pemilik, atau Supervisor)
+        if (!$user->isSuperAdmin() && !$user->isAdmin() && $log->created_by != $user->id && $log->supervisor_id != $user->id) {
             abort(403, 'ANDA TIDAK MEMILIKI AKSES UNTUK MEMPERBARUI DATA INI.');
+        }
+
+        if ($log->approval_status === 'approved' && !$user->isSuperAdmin() && !$user->isAdmin()) {
+            abort(403, 'Tidak dapat mengedit data yang sudah disetujui.');
         }
 
         $validatedData = $request->validate([
@@ -287,15 +350,75 @@ class SoapLogController extends Controller
             'medical_record_no' => 'nullable|string',
             'visit_date' => 'required|date',
             'nama_dpjp' => 'required|string|max:255',
+            'api_dpjp_id' => 'nullable|string',
             'subjective' => 'required|string',
             'objective' => 'required|string',
             'assessment' => 'required|string',
             'plan' => 'required|string',
+            'ttv_td' => 'nullable|string',
+            'ttv_hr' => 'nullable|string',
+            'ttv_rr' => 'nullable|string',
+            'ttv_temp' => 'nullable|string',
+            'ttv_spo2' => 'nullable|string',
+            'ttv_vas' => 'nullable|string',
             'diagnosa_id' => 'nullable|string',
+            'foto_visite' => 'nullable|array',
+            'foto_visite.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Secara otomatis mengisi ID user yang mengupdate
         $validatedData['updated_by'] = Auth::id();
+        // Just-In-Time (JIT) Provisioning: Cari atau buat akun DPJP (Konsulen) otomatis
+        $namaDpjp = $validatedData['nama_dpjp'];
+        $apiDpjpId = $request->input('api_dpjp_id'); // Ambil kode dokter
+        
+        // Gunakan kode dokter sebagai email (atau slug nama jika kode tidak ada)
+        $emailPrefix = $apiDpjpId ? strtolower(trim($apiDpjpId)) : \Illuminate\Support\Str::slug($namaDpjp) . '_' . uniqid();
+        
+        // Coba cari berdasarkan nama yang persis sama terlebih dahulu untuk menghindari duplikasi
+        $dpjp = \App\Models\User::where('role', \App\Models\User::ROLE_KONSULEN)
+                    ->where('name', $namaDpjp)
+                    ->first();
+
+        if (!$dpjp) {
+            $dpjp = \App\Models\User::firstOrCreate(
+                ['email' => $emailPrefix . '@rs.local'], // Cari berdasarkan email (kode dokter) agar unik
+                [
+                    'name' => $namaDpjp,
+                    'password' => bcrypt('12345678'), // Password default 12345678 sesuai permintaan
+                    'role' => \App\Models\User::ROLE_KONSULEN,
+                    'is_active' => true,
+                ]
+            );
+        }
+
+        // Jika user sudah ada tapi namanya mungkin berubah di API, update namanya
+        if ($dpjp->name !== $namaDpjp) {
+            $dpjp->update(['name' => $namaDpjp]);
+        }
+
+        // Set otomatis supervisor ke DPJP yang dipilih dari API
+        $validatedData['supervisor_id'] = $dpjp->id;
+
+        // Handle file upload
+        if ($request->hasFile('foto_visite')) {
+            // Ambil foto lama jika ada
+            $paths = is_array($log->foto_visite) ? $log->foto_visite : [];
+            if (!empty($log->foto_visite) && !is_array($log->foto_visite)) {
+                $paths = [$log->foto_visite];
+            }
+            
+            // Tambahkan foto baru
+            foreach ($request->file('foto_visite') as $file) {
+                $paths[] = $file->store('soap_photos', 'public');
+            }
+            $validatedData['foto_visite'] = $paths;
+        }
+
+        if ($log->approval_status === 'rejected') {
+            $validatedData['approval_status'] = 'pending';
+            $validatedData['supervisor_note'] = null;
+        }
 
         $log->update($validatedData);
 
@@ -312,6 +435,10 @@ class SoapLogController extends Controller
         // Hanya admin/superadmin atau pemilik data yang bisa menghapus
         if (!$user->isSuperAdmin() && !$user->isAdmin() && $log->created_by != $user->id) {
             abort(403, 'ANDA TIDAK MEMILIKI AKSES UNTUK MENGHAPUS DATA INI.');
+        }
+
+        if ($log->approval_status === 'approved' && !$user->isSuperAdmin() && !$user->isAdmin()) {
+            abort(403, 'Tidak dapat menghapus data yang sudah disetujui.');
         }
 
         $log->delete();

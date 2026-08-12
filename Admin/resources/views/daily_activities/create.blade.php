@@ -102,6 +102,14 @@
                         @enderror
                     </div>
 
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="ri-user-star-line text-primary me-1"></i> Supervisor / DPJP Utama</label>
+                        <div class="p-3 bg-light rounded border">
+                            <h5 class="mb-1 text-primary">{{ Auth::user()->supervisor ? Auth::user()->supervisor->name : 'Belum Ditentukan' }}</h5>
+                            <small class="text-muted">Laporan ini akan secara otomatis dikirimkan ke DPJP Anda untuk diverifikasi.</small>
+                        </div>
+                    </div>
+
                     <hr class="my-4">
 
                     <div class="d-flex justify-content-end align-items-center">
@@ -252,5 +260,14 @@
             }
         });
     })();
+
+    // Inisialisasi Select2 untuk dropdown Tindakan Medis
+    $(document).ready(function() {
+        $('select[name="medical_activity_id"]').select2({
+            placeholder: "-- Pilih Tindakan Medis --",
+            allowClear: true,
+            width: '100%'
+        });
+    });
 </script>
 @endpush

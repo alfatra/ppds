@@ -66,6 +66,50 @@
             <small class="form-text text-muted mt-2">Diagnosa sesuai standar ICD-10 Medinfras</small>
         </div>
 
+        <div class="row mb-3">
+            <div class="col-12">
+                <label class="form-label fw-bold text-muted"><i class="ri-heart-pulse-fill text-danger me-1"></i> Tanda-Tanda Vital (TTV)</label>
+                <div class="row g-2">
+                    <div class="col-md-2 col-4">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light" title="Tekanan Darah">TD</span>
+                            <input type="text" class="form-control" name="ttv_td" value="{{ old('ttv_td', $log->ttv_td ?? '') }}" placeholder="120/80">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-4">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light" title="Heart Rate">HR</span>
+                            <input type="text" class="form-control" name="ttv_hr" value="{{ old('ttv_hr', $log->ttv_hr ?? '') }}" placeholder="80">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-4">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light" title="Respiratory Rate">RR</span>
+                            <input type="text" class="form-control" name="ttv_rr" value="{{ old('ttv_rr', $log->ttv_rr ?? '') }}" placeholder="20">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-4">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light" title="Suhu Badan">Suhu</span>
+                            <input type="text" class="form-control" name="ttv_temp" value="{{ old('ttv_temp', $log->ttv_temp ?? '') }}" placeholder="36.5">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-4">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light" title="Saturasi Oksigen">SpO2</span>
+                            <input type="text" class="form-control" name="ttv_spo2" value="{{ old('ttv_spo2', $log->ttv_spo2 ?? '') }}" placeholder="99%">
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-4">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light" title="Skala Nyeri (0-10)">VAS</span>
+                            <input type="text" class="form-control" name="ttv_vas" value="{{ old('ttv_vas', $log->ttv_vas ?? '') }}" placeholder="0-10">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold text-muted">S - Subjective</label>
@@ -82,6 +126,24 @@
             <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold text-muted">P - Plan</label>
                 <textarea class="form-control" name="plan" rows="4" placeholder="Rencana pengobatan, terapi, atau tindakan...">{{ old('plan', $log->plan ?? '') }}</textarea>
+            </div>
+            <div class="col-md-12 mb-3">
+                <label class="form-label fw-bold text-muted">Foto Hasil Visite (Opsional)</label>
+                <input type="file" class="form-control" name="foto_visite[]" accept="image/*" multiple>
+                @if(isset($log) && !empty($log->foto_visite))
+                    <div class="mt-2">
+                        <p class="mb-1 text-muted">Foto saat ini:</p>
+                        <div class="d-flex flex-wrap gap-2">
+                        @if(is_array($log->foto_visite))
+                            @foreach($log->foto_visite as $foto)
+                                <img src="{{ asset('storage/' . $foto) }}" alt="Foto Visite" class="img-thumbnail" style="max-height: 200px;">
+                            @endforeach
+                        @else
+                            <img src="{{ asset('storage/' . $log->foto_visite) }}" alt="Foto Visite" class="img-thumbnail" style="max-height: 200px;">
+                        @endif
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -110,9 +172,30 @@
                     <!-- Suggestions akan ditampilkan di sini -->
                 </div>
             </div>
+            <input type="hidden" name="api_dpjp_id" id="api_dpjp_id" value="{{ old('api_dpjp_id', $log->api_dpjp_id ?? '') }}">
             @error('nama_dpjp')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
+        </div>
+    </div>
+</div>
+
+<!-- SUPERVISOR / APPROVAL -->
+<div class="card border border-light bg-light shadow-none mb-4">
+    <div class="card-body">
+        <h5 class="font-size-15 mb-3 text-warning"><i class="ri-user-star-line me-1"></i> Supervisor / DPJP Utama</h5>
+        
+        @if(isset($log) && $log->approval_status == 'rejected')
+            <div class="alert alert-danger mb-3">
+                <strong>Laporan ditolak:</strong> {{ $log->supervisor_note }}
+            </div>
+        @endif
+
+        <div class="p-3 bg-white rounded border">
+            <h5 class="mb-1 text-warning" id="display_supervisor_name">
+                {{ isset($log) && $log->nama_dpjp ? $log->nama_dpjp : 'Belum Ditentukan' }}
+            </h5>
+            <small class="text-muted">Laporan ini akan secara otomatis dikirimkan ke DPJP Anda untuk diverifikasi.</small>
         </div>
     </div>
 </div>
@@ -439,7 +522,7 @@
                 const nama = dokter.FullName || dokter.UserFullName || dokter.UserName || dokter.nama || '';
                 const kode = dokter.ParamedicCode || '';
                 return `
-                    <button type="button" class="list-group-item list-group-item-action py-2" onclick="selectDokter('${nama.replace(/'/g, "\\'")}'); return false;">
+                    <button type="button" class="list-group-item list-group-item-action py-2" onclick="selectDokter('${nama.replace(/'/g, "\\'")}', '${kode.replace(/'/g, "\\'")}'); return false;">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <strong>${nama}</strong>
@@ -454,9 +537,17 @@
         }
 
         // Pilih dokter dari suggestions
-        function selectDokter(nama) {
+        function selectDokter(nama, kode) {
             dokterInput.value = nama; 
+            document.getElementById('api_dpjp_id').value = kode;
             dokterSuggestions.style.display = 'none';
+
+            // Update nama supervisor di kotak kuning secara live
+            const displaySupervisor = document.getElementById('display_supervisor_name');
+            if (displaySupervisor) {
+                displaySupervisor.textContent = nama;
+            }
+            
             
             Swal.fire({
                 title: 'DPJP Terpilih!',

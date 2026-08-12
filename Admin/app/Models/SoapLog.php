@@ -26,7 +26,17 @@ class SoapLog extends Model
     'nama_dpjp', 
     'created_by',
     'updated_by',
+    'ttv_td',
+    'ttv_hr',
+    'ttv_rr',
+    'ttv_temp',
+    'ttv_spo2',
+    'ttv_vas',
     'diagnosa_id',
+    'foto_visite',
+    'supervisor_id',
+    'approval_status',
+    'supervisor_note',
 ];
     
     /**
@@ -38,6 +48,7 @@ class SoapLog extends Model
         'visit_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'foto_visite' => 'array',
     ];
 
     /**
@@ -63,6 +74,11 @@ class SoapLog extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
     }
 }
 

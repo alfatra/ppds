@@ -9,7 +9,7 @@ class MedicalActivityController extends Controller
 {
     public function index()
     {
-        $activities = MedicalActivity::latest()->paginate(10);
+        $activities = MedicalActivity::latest()->orderBy('id', 'desc')->paginate(10);
         return view('admin.medical_activities.index', compact('activities'));
     }
 

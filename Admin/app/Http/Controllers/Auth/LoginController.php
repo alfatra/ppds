@@ -49,8 +49,16 @@ class LoginController extends Controller
      */
     protected function credentials(Request $request)
     {
+        $credentials = $request->only($this->username(), 'password');
+        $username = $credentials[$this->username()];
+
+        // Jika username bukan format email, asumsikan itu adalah kode paramedic dan tambahkan @rs.local
+        if (!filter_var($username, FILTER_VALIDATE_EMAIL) && !str_contains($username, '@')) {
+            $credentials[$this->username()] = strtolower(trim($username)) . '@rs.local';
+        }
+
         // Attempt to log in only active users
-        return array_merge($request->only($this->username(), 'password'), ['is_active' => true]);
+        return array_merge($credentials, ['is_active' => true]);
     }
 
     /**
@@ -63,8 +71,15 @@ class LoginController extends Controller
      */
     protected function sendFailedLoginResponse(Request $request)
     {
+        $username = $request->{$this->username()};
+        
+        // Sesuaikan username dengan logika di credentials
+        if (!filter_var($username, FILTER_VALIDATE_EMAIL) && !str_contains($username, '@')) {
+            $username = strtolower(trim($username)) . '@rs.local';
+        }
+
         // Check if the user exists and password is correct, but the account is inactive.
-        $user = User::where($this->username(), $request->{$this->username()})->first();
+        $user = User::where($this->username(), $username)->first();
 
         if ($user && Hash::check($request->password, $user->password) && !$user->is_active) {
             $alert = [

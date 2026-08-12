@@ -35,10 +35,10 @@
 
                                                 <div class="mb-3 auth-form-group-custom mb-4">
                                                     <i class="ri-user-2-line auti-custom-input-icon"></i>
-                                                    <label for="email" class="fw-semibold">Email <span class="text-danger">*</span></label>
-                                                    <input type="email" class="form-control @error('email') is-invalid @enderror" name="email"
+                                                    <label for="email" class="fw-semibold">Email / Kode Paramedic <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('email') is-invalid @enderror" name="email"
                                                         id="email" value="{{ old('email') }}" required
-                                                        autocomplete="email" autofocus placeholder="Enter email">
+                                                        autocomplete="email" autofocus placeholder="Enter email atau kode paramedic">
                                                     @error('email')
                                                         <span class="invalid-feedback" role="alert">
                                                             <strong>{{ $message }}</strong>

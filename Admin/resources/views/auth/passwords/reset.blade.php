@@ -76,7 +76,7 @@
                                             </form>
                                         </div>
                                         <div class="mt-5 text-center">
-                                            <p>© {{ date('Y') }} Nazox. Crafted with <i
+                                            <p>© {{ date('Y') }} SIMRS. Crafted with <i
                                                     class="mdi m-di-heart text-danger"></i> by Themesdesign</p>
                                         </div>
                                     </div>

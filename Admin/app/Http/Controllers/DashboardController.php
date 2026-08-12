@@ -22,7 +22,13 @@ class DashboardController extends Controller
 
         $query = SoapLog::query();
         if (!$isAdmin) {
-            $query->where('created_by', $user->id);
+            if ($user->isKonsulen()) {
+                // Untuk konsulen, tampilkan SOAP yang mereka supervisi (sebagai DPJP)
+                $query->where('supervisor_id', $user->id);
+            } else {
+                // Untuk PPDS biasa, tampilkan SOAP yang mereka buat
+                $query->where('created_by', $user->id);
+            }
         }
 
         // Statistik Dasar
@@ -119,7 +125,7 @@ class DashboardController extends Controller
             $counts[] = $item->count;
         }
 
-        \Log::debug('[Dashboard] Diagnosis Breakdown', [
+        Log::debug('[Dashboard] Diagnosis Breakdown', [
             'count' => count($codes),
             'codes' => $codes,
             'names' => $names,

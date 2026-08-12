@@ -44,6 +44,8 @@
                                 <th>Nama Pasien</th>
                                 <th>No. RM</th>
                                 <th>Keterangan</th>
+                                <th>Supervisor</th>
+                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -57,17 +59,37 @@
                                 <td>{{ $activity->patient_name ?? '-' }}</td>
                                 <td>{{ $activity->medical_record_no ?? '-' }}</td>
                                 <td>{{ $activity->notes ?? '-' }}</td>
+                                <td>{{ $activity->supervisor->name ?? '-' }}</td>
                                 <td>
-                                    <a href="{{ route('daily-activities.edit', $activity->id) }}" class="btn btn-sm btn-info" title="Edit">
-                                        <i class="ri-pencil-line"></i>
-                                    </a>
-                                    <form action="{{ route('daily-activities.destroy', $activity->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
-                                    </form>
+                                    @if($activity->approval_status == 'pending')
+                                        <span class="badge bg-warning">Pending</span>
+                                    @elseif($activity->approval_status == 'approved')
+                                        <span class="badge bg-success">Approved</span>
+                                    @else
+                                        <span class="badge bg-danger" title="{{ $activity->supervisor_note }}">Rejected</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($activity->approval_status != 'approved' || auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
+                                        @if($activity->approval_status == 'rejected')
+                                            <a href="{{ route('daily-activities.edit', $activity->id) }}" class="btn btn-sm btn-danger" title="Revisi">
+                                                <i class="ri-edit-circle-fill"></i> Revisi
+                                            </a>
+                                        @else
+                                            <a href="{{ route('daily-activities.edit', $activity->id) }}" class="btn btn-sm btn-info" title="Edit">
+                                                <i class="ri-pencil-line"></i>
+                                            </a>
+                                        @endif
+                                        <form action="{{ route('daily-activities.destroy', $activity->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
+                                                <i class="ri-delete-bin-line"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="badge bg-light text-muted"><i class="ri-lock-2-line"></i> Terkunci</span>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach
