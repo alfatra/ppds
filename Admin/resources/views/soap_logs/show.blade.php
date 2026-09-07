@@ -48,6 +48,13 @@
                 </dd>
                 <dt class="col-sm-3">Plan</dt>
                 <dd class="col-sm-9"><pre>{{ $log->plan }}</pre></dd>
+                
+                @if($log->body_diagram)
+                <dt class="col-sm-3">Body Diagram</dt>
+                <dd class="col-sm-9">
+                    <img src="{{ asset('storage/' . $log->body_diagram) }}" alt="Body Diagram" class="img-fluid img-thumbnail" style="max-height: 400px;">
+                </dd>
+                @endif
             </dl>
             <a href="{{ route('ppds.soap-logs.index') }}" class="btn btn-secondary btn-sm">Back</a>
         </div>

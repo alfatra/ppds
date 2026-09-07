@@ -214,6 +214,22 @@ class SoapLogController extends Controller
             $validatedData['foto_visite'] = $paths;
         }
 
+        // Handle body diagram base64
+        if ($request->has('body_diagram_base64') && !empty($request->body_diagram_base64)) {
+            try {
+                $image_parts = explode(";base64,", $request->body_diagram_base64);
+                if (count($image_parts) == 2) {
+                    $image_base64 = base64_decode($image_parts[1]);
+                    $fileName = 'diagram_' . uniqid() . '.png';
+                    $filePath = 'soap_body_diagrams/' . $fileName;
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($filePath, $image_base64);
+                    $validatedData['body_diagram'] = $filePath;
+                }
+            } catch (\Exception $e) {
+                Log::error('Error saving body diagram: ' . $e->getMessage());
+            }
+        }
+
         SoapLog::create($validatedData);
 
         return redirect()->route('ppds.soap-logs.index')
@@ -413,6 +429,22 @@ class SoapLogController extends Controller
                 $paths[] = $file->store('soap_photos', 'public');
             }
             $validatedData['foto_visite'] = $paths;
+        }
+
+        // Handle body diagram base64
+        if ($request->has('body_diagram_base64') && !empty($request->body_diagram_base64)) {
+            try {
+                $image_parts = explode(";base64,", $request->body_diagram_base64);
+                if (count($image_parts) == 2) {
+                    $image_base64 = base64_decode($image_parts[1]);
+                    $fileName = 'diagram_' . uniqid() . '.png';
+                    $filePath = 'soap_body_diagrams/' . $fileName;
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($filePath, $image_base64);
+                    $validatedData['body_diagram'] = $filePath;
+                }
+            } catch (\Exception $e) {
+                Log::error('Error saving body diagram: ' . $e->getMessage());
+            }
         }
 
         if ($log->approval_status === 'rejected') {

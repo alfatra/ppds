@@ -145,6 +145,21 @@
                     </div>
                 @endif
             </div>
+
+            <div class="col-md-12 mb-3">
+                <label class="form-label fw-bold text-muted">Body Diagram (Opsional)</label>
+                <div>
+                    <button type="button" class="btn btn-outline-primary waves-effect waves-light" data-bs-toggle="modal" data-bs-target="#bodyDiagramModal">
+                        <i class="ri-body-scan-line align-middle me-1"></i> Buka Body Diagram
+                    </button>
+                    <input type="hidden" name="body_diagram_base64" id="body_diagram_base64">
+                    
+                    <div id="body_diagram_preview_container" class="mt-2" style="{{ isset($log) && $log->body_diagram ? '' : 'display:none;' }}">
+                        <p class="mb-1 text-muted">Diagram tersimpan:</p>
+                        <img id="body_diagram_preview" src="{{ isset($log) && $log->body_diagram ? asset('storage/' . $log->body_diagram) : '' }}" alt="Body Diagram" class="img-thumbnail" style="max-height: 250px;">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -239,7 +254,68 @@
     </div>
 </div>
 
+<!-- Modal Body Diagram -->
+<div class="modal fade" id="bodyDiagramModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Body Diagram Annotation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <div class="row">
+                    <div class="col-md-10 d-flex justify-content-center">
+                        <div class="canvas-container border bg-white shadow-sm" style="overflow: auto;">
+                            <canvas id="bodyDiagramCanvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-grid gap-2">
+                            <div class="mb-2">
+                                <label for="diagramType" class="form-label small fw-bold">Pilih Diagram:</label>
+                                <select class="form-select form-select-sm" id="diagramType">
+                                    <option value="male">Tubuh Laki-laki</option>
+                                    <option value="female">Tubuh Perempuan</option>
+                                    <option value="dental">Gigi & Mulut</option>
+                                </select>
+                            </div>
+                            
+                            <hr class="my-1">
+                            <button type="button" class="btn btn-outline-primary active" id="btn_draw_free"><i class="fas fa-pencil-alt me-1"></i> Free Draw</button>
+                            
+                            <div class="mt-2">
+                                <label for="drawing-color" class="form-label small">Warna:</label>
+                                <input type="color" id="drawing-color" class="form-control form-control-color w-100" value="#ff0000" title="Choose color">
+                            </div>
+                            
+                            <div class="mt-2">
+                                <label for="drawing-line-width" class="form-label small">Ketebalan:</label>
+                                <input type="range" id="drawing-line-width" class="form-range" value="3" min="1" max="50">
+                            </div>
+                            
+                            <hr class="my-2">
+                            <button type="button" class="btn btn-outline-secondary" id="btn_draw_circle"><i class="far fa-circle me-1"></i> Lingkaran</button>
+                            <button type="button" class="btn btn-outline-secondary" id="btn_draw_rect"><i class="far fa-square me-1"></i> Kotak</button>
+                            <button type="button" class="btn btn-outline-secondary" id="btn_draw_text"><i class="fas fa-font me-1"></i> Teks</button>
+                            <button type="button" class="btn btn-outline-secondary" id="btn_select_mode"><i class="fas fa-mouse-pointer me-1"></i> Pilih Objek</button>
+                            
+                            <hr class="my-2">
+                            <button type="button" class="btn btn-outline-danger" id="btn_delete_object"><i class="fas fa-eraser me-1"></i> Hapus Terpilih</button>
+                            <button type="button" class="btn btn-danger" id="btn_clear_canvas"><i class="fas fa-trash me-1"></i> Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="btn_save_diagram">Apply & Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script>
     (function() {
@@ -1017,9 +1093,188 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initSoapFormValidation);
+        document.addEventListener('DOMContentLoaded', () => {
+            initSoapFormValidation();
+            initBodyDiagram();
+        });
     } else {
         initSoapFormValidation();
+        initBodyDiagram();
+    }
+
+    function initBodyDiagram() {
+        let canvas = null;
+        const modalEl = document.getElementById('bodyDiagramModal');
+        if (!modalEl) return;
+        
+        // Only initialize canvas when modal is shown to ensure correct dimensions
+        modalEl.addEventListener('shown.bs.modal', function () {
+            if (!canvas) {
+                canvas = new fabric.Canvas('bodyDiagramCanvas', {
+                    isDrawingMode: true,
+                    width: 800,
+                    height: 600
+                });
+
+                const maleImgUrl = "{{ asset('build/images/body-diagram.jpg') }}";
+                const femaleImgUrl = "{{ asset('build/images/body-diagram-female.jpg') }}";
+                const dentalImgUrl = "{{ asset('build/images/body-diagram-dental.jpg') }}";
+                
+                function loadBackgroundImage(url) {
+                    fabric.Image.fromURL(url, function(img) {
+                        if(!img) return;
+                        
+                        // Clear canvas objects (but keeping them might be desired in a real app, for simplicity we clear when switching bg)
+                        canvas.clear();
+                        
+                        const scale = Math.min(800 / img.width, 600 / img.height);
+                        img.scale(scale);
+                        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+                            originX: 'center',
+                            originY: 'center',
+                            left: 400,
+                            top: 300
+                        });
+                    }, { crossOrigin: 'anonymous' });
+                }
+
+                // Initial load
+                const diagramType = document.getElementById('diagramType');
+                
+                function updateDiagramBackground() {
+                    if (!diagramType) return;
+                    let url = maleImgUrl;
+                    if (diagramType.value === 'female') url = femaleImgUrl;
+                    if (diagramType.value === 'dental') url = dentalImgUrl;
+                    loadBackgroundImage(url);
+                }
+
+                if (diagramType) {
+                    diagramType.addEventListener("change", updateDiagramBackground);
+                }
+                updateDiagramBackground();
+                
+                setupCanvasTools(canvas, modalEl);
+            }
+        });
+        
+        function setupCanvasTools(canvas, modalEl) {
+            // Free Draw
+            document.getElementById('btn_draw_free').addEventListener('click', function() {
+                canvas.isDrawingMode = true;
+                setActiveButton(this);
+            });
+            
+            // Color & Width
+            const colorEl = document.getElementById('drawing-color');
+            const widthEl = document.getElementById('drawing-line-width');
+            
+            canvas.freeDrawingBrush.color = colorEl.value;
+            canvas.freeDrawingBrush.width = parseInt(widthEl.value, 10) || 3;
+            
+            colorEl.onchange = function() {
+                canvas.freeDrawingBrush.color = this.value;
+            };
+            widthEl.onchange = function() {
+                canvas.freeDrawingBrush.width = parseInt(this.value, 10) || 3;
+            };
+            
+            // Select Mode
+            document.getElementById('btn_select_mode').addEventListener('click', function() {
+                canvas.isDrawingMode = false;
+                setActiveButton(this);
+            });
+            
+            // Circle
+            document.getElementById('btn_draw_circle').addEventListener('click', function() {
+                canvas.isDrawingMode = false;
+                const circle = new fabric.Circle({
+                    radius: 30, fill: 'transparent', stroke: colorEl.value, strokeWidth: parseInt(widthEl.value, 10) || 3,
+                    left: 100, top: 100
+                });
+                canvas.add(circle);
+                canvas.setActiveObject(circle);
+                setActiveButton(this);
+            });
+            
+            // Rectangle
+            document.getElementById('btn_draw_rect').addEventListener('click', function() {
+                canvas.isDrawingMode = false;
+                const rect = new fabric.Rect({
+                    width: 60, height: 60, fill: 'transparent', stroke: colorEl.value, strokeWidth: parseInt(widthEl.value, 10) || 3,
+                    left: 100, top: 100
+                });
+                canvas.add(rect);
+                canvas.setActiveObject(rect);
+                setActiveButton(this);
+            });
+            
+            // Text
+            document.getElementById('btn_draw_text').addEventListener('click', function() {
+                canvas.isDrawingMode = false;
+                const text = new fabric.IText('Teks', {
+                    left: 100, top: 100, fill: colorEl.value, fontSize: 24
+                });
+                canvas.add(text);
+                canvas.setActiveObject(text);
+                setActiveButton(this);
+            });
+            
+            // Delete Object
+            document.getElementById('btn_delete_object').addEventListener('click', function() {
+                const activeObjects = canvas.getActiveObjects();
+                if (activeObjects.length) {
+                    canvas.discardActiveObject();
+                    activeObjects.forEach(function(object) {
+                        canvas.remove(object);
+                    });
+                }
+            });
+            
+            // Clear All (except background)
+            document.getElementById('btn_clear_canvas').addEventListener('click', function() {
+                canvas.getObjects().forEach(function(obj) {
+                    canvas.remove(obj);
+                });
+            });
+            
+            // Save Diagram
+            document.getElementById('btn_save_diagram').addEventListener('click', function() {
+                // Remove selection before saving
+                canvas.discardActiveObject();
+                canvas.renderAll();
+                
+                // Export canvas to base64
+                const dataURL = canvas.toDataURL({
+                    format: 'png',
+                    quality: 1
+                });
+                
+                document.getElementById('body_diagram_base64').value = dataURL;
+                
+                // Show preview
+                const previewContainer = document.getElementById('body_diagram_preview_container');
+                const previewImg = document.getElementById('body_diagram_preview');
+                previewImg.src = dataURL;
+                previewContainer.style.display = 'block';
+                
+                bootstrap.Modal.getInstance(modalEl).hide();
+            });
+            
+            function setActiveButton(btn) {
+                const buttons = ['btn_draw_free', 'btn_select_mode', 'btn_draw_circle', 'btn_draw_rect', 'btn_draw_text'];
+                buttons.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(!el) return;
+                    el.classList.remove('active', 'btn-primary', 'btn-outline-primary');
+                    if (id === btn.id) {
+                        el.classList.add('active', 'btn-primary');
+                    } else {
+                        el.classList.add('btn-outline-secondary');
+                    }
+                });
+            }
+        }
     }
 })();
 </script>

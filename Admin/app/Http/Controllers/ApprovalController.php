@@ -57,7 +57,7 @@ class ApprovalController extends Controller
 
         $log->update(['approval_status' => 'approved', 'supervisor_note' => null]);
         return redirect()->back()->with('success', 'SOAP Log approved.');
-    }
+    } 
 
     public function rejectSoapLog(Request $request, $id)
     {
